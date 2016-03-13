@@ -1,11 +1,11 @@
-xdata-d3
-========
+d3-workout
+==========
 ```
-Usinf D3 along with node.js
+This is a d3 workout repository using node.js at the backend. To try out, use the below.
 
 # Get the latest repo
-git clone https://github.com/poojits/xdata-d3.git
-cd xdata-d3
+git clone https://bitbucket.org/vadivel_selvaraj/d3workout
+cd d3workout
 
 # Install NPM dependencies
 npm install
@@ -13,6 +13,6 @@ npm install
 # Start the server
 npm start
 
-# youtube video link
-http://youtu.be/h90yWERTb5U
-```
+Collaborators:
+Vadivel @ gct.vadivel@gmail.com
+Ramkumar @ helloram52@gmail.com
