@@ -1,18 +1,21 @@
-d3-workout
-==========
-```
-This is a d3 workout repository using node.js at the backend. To try out, use the below.
+# README #
 
-# Get the latest repo
-git clone https://bitbucket.org/vadivel_selvaraj/d3workout
-cd d3workout
+### What is this repository for? ###
+* This is a d3 workout repository using node.js at the backend.
 
-# Install NPM dependencies
-npm install
+### How do I set up? ###
 
-# Start the server
-npm start
+* Get the latest repo
+> git clone https://bitbucket.org/vadivel_selvaraj/d3workout
+> cd d3workout
 
-Collaborators:
-Vadivel @ gct.vadivel@gmail.com
-Ramkumar @ helloram52@gmail.com
+* Install NPM dependencies
+> npm install
+
+* Start the server
+> npm start
+
+### Who do I talk to? ###
+
+* Vadivel @ gct.vadivel@gmail.com
+* Ramkumar @ helloram52@gmail.com
