@@ -1,0 +1,51 @@
+extends layout
+
+block content
+	.container
+		h1(class="text-center")
+			span D3 Demo
+		hr
+	#qtr-wrapper
+		.container
+			span Quarter
+			br
+			div(class="btn-group" data-toggle="buttons")
+				label(class="btn btn-primary active")
+					<input type="checkbox" id="qtr-all"> ALL
+				label(class="btn btn-primary")
+					<input type="checkbox"> QTR-1
+				label(class="btn btn-primary")
+					<input type="checkbox"> QTR-2
+				label(class="btn btn-primary")
+					<input type="checkbox"> QTR-3
+				label(class="btn btn-primary")
+					<input type="checkbox"> QTR-4
+	#year-wrapper
+		.container
+			span Years
+			br
+			#year-btn-wrapper
+				div(class="btn-group btn-group-vertical" data-toggle="buttons")
+					label(class="btn btn-primary active")
+						<input type="checkbox" id="year-all">ALL
+					label(class="btn btn-primary")
+							<input type="checkbox">2003
+					label(class="btn btn-primary")
+							<input type="checkbox">2004
+					label(class="btn btn-primary")
+							<input type="checkbox">2005
+					label(class="btn btn-primary")
+							<input type="checkbox">2006
+					label(class="btn btn-primary")
+							<input type="checkbox">2007
+					label(class="btn btn-primary")
+							<input type="checkbox">2008
+					label(class="btn btn-primary")
+							<input type="checkbox">2009
+					label(class="btn btn-primary")
+							<input type="checkbox">2010
+					label(class="btn btn-primary")
+							<input type="checkbox">2011
+	.container
+		#canvas-div
+				span Visualization

@@ -1,0 +1,80 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+	outline: none;
+}
+.land {
+  fill: #ddd;
+}
+ path {
+  stroke: grey;
+  stroke-width: 0.5px;
+  fill: #ccc;
+}
+.bubble {
+  fill-opacity: .5;
+  stroke: #fff;
+  stroke-width: .5px;
+  fill: brown;
+}
+.bubble :hover {
+  stroke: black;
+}
+#controls {
+  position: relative;
+  left: 15px;
+  top: 250px;
+}
+.cq-1, .cq-2, .cq-4 {
+  display: none;
+}
+#menu-toggle {
+  padding-right:20px;
+}
+.container .btn-group .active,
+.container .btn-group-vertical .active {
+  background-color : green
+}
+#year-wrapper {
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: black;
+  height: 300px;
+  width: 120px;
+  float: left;
+}
+#year-btn-wrapper {
+  overflow-y: scroll;
+  height: 200px;
+  width: 80px;
+}
+#qtr-wrapper {
+  text-align:  center;
+/* 
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: black;
+*/
+}
+#canvas-div {
+/*
+  outline: 1px solid black;
+  background: transparent;
+*/
+  height: 300px;
+}
+#footer {
+    bottom: 0;
+    color: black;
+    position: absolute;
+    right: 0;
+    width: 235px;
+    z-index: 999999;
+}
