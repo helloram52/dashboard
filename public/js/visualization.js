@@ -58,25 +58,19 @@ var Visualization = function() {
 
 	//get data for pieChart
 	this.getPieChartData = function(JSONdata) {
-
 		var pieChartDataArray = [], i = 0;
 		/* 
 			pieChartDataArray=[
-								{label: <busineessUnit>, revenue: <revenue>},
-								{label: <busineessUnit>, revenue: <revenue>}
-							  ];
+				{label: <busineessUnit>, revenue: <revenue>},
+				{label: <busineessUnit>, revenue: <revenue>}
+			  ];
 		*/
 		
 		for(var busUnit in JSONdata){
-			
 			var revenue = 0;
-
 			for(var year in JSONdata[busUnit]){
-
 				for(var month in JSONdata[busUnit][year]){
-				
 					revenue += JSONdata[busUnit][year][month]['TOTAL'];
-				
 				}	
 			}
 
