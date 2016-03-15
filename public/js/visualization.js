@@ -43,6 +43,8 @@ var Visualization = function() {
 			{legendLabel: "Legend String 7", label: 'G', magnitude: 27, link: "http://www.if4it.com/glossary.html"}
 		];
 
+		var dataset2 = this.getPieChartData(jsonObject);
+
 		this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
 	},
 
@@ -52,6 +54,39 @@ var Visualization = function() {
 
 	this.UpdateView = function() {
 
+	},
+
+	//get data for pieChart
+	this.getPieChartData = function(JSONdata) {
+
+		var pieChartDataArray = [], i = 0;
+		/* 
+			pieChartDataArray=[
+								{label: <busineessUnit>, revenue: <revenue>},
+								{label: <busineessUnit>, revenue: <revenue>}
+							  ];
+		*/
+		
+		for(var busUnit in JSONdata){
+			
+			var revenue = 0;
+
+			for(var year in JSONdata[busUnit]){
+
+				for(var month in JSONdata[busUnit][year]){
+				
+					revenue += JSONdata[busUnit][year][month]['TOTAL'];
+				
+				}	
+			}
+
+			var pieChartData = {};
+			pieChartData['label'] = busUnit;
+			pieChartData['revenue'] = revenue;
+			pieChartDataArray[i++] = pieChartData;
+		}
+
+		return pieChartDataArray;
 	},
 
 	// pieName => A unique drawing identifier that has no spaces, no "." and no "#" characters.
