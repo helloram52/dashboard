@@ -145,7 +145,7 @@ var Visualization = function() {
 		var x = d3.scale.linear().domain([0, d3.max(dataset, function(d) { return d.magnitude; })]).rangeRound([0, pieWidthTotal]);
 		var y = d3.scale.linear().domain([0, dataset.length]).range([0, (dataset.length * 20)]);
 
-		var tooltip = d3.select('#chart')
+		var tooltip = d3.select(selectString)
 			.append('div')
 			.attr('class', 'tooltip');
 
@@ -177,9 +177,11 @@ var Visualization = function() {
 			var total = d3.sum(dataset.map(function(d) {
 				return d.magnitude;
 			}));
-			var percent = Math.round(1000 * d.data.magnitude / total) / 10;
-			tooltip.select('.label').html(d.data.label);
-			tooltip.select('.count').html(d.data.magnitude); 
+			var percent = 0;
+			if(total)
+				percent = Math.round(1000 * d.magnitude / total) / 10;
+			tooltip.select('.label').html(d.label);
+			tooltip.select('.count').html(d.magnitude); 
 			tooltip.select('.percent').html(percent + '%'); 
 			tooltip.style('display', 'block');
 		};

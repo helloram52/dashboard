@@ -80,6 +80,7 @@ path {
 	background: transparent;
 */
 	height: 300px;
+	position: relative;
 }
 
 #footer {
