@@ -7,22 +7,19 @@ var fs=require('fs');
 var outputFile='./public/data/processeddata.json';
 
 /* GET home page. */
-router.get('/', function(req, res) {
-
+router.get('/', function(request, response) {
 	//if processed JSON doesn't exist, create one before rendering
 	if(!utilities.fileExists(outputFile)) {
 		var inputFile='./public/data/data.json';
 		utilities.processData(inputFile, outputFile);
 	}
-
-	res.render('index', { title: 'D3 visualization demo' });
+	response.render('index', { title: 'D3 visualization demo' });
 });
 
-router.get('/getGraphJSON', function(req, res) {
-
-	res.json(JSON.parse(fs.readFileSync(outputFile)));
-	
+router.get('/getGraphJSON', function(request, response) {
+	// Note: We've compression enabled in app.js using compression lib.
+	// So, we don't need compress this json file.
+	response.json(JSON.parse(fs.readFileSync(outputFile)));
 });
-
 
 module.exports = router;
