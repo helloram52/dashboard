@@ -6,10 +6,10 @@ var Visualization = {
 	};
 
 	this.UpdateView = function() {
-
+		
 	};
 
 	this.destroy = function() {
-
+		
 	};
 };

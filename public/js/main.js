@@ -1,4 +1,7 @@
 $(document).ready(function() {
+	$.get("/getGraphJSON", function(data) {
+		
+	});
 	// Handle Qtr/Year checkbox clicks
 	// ALL checkbox and the rest of the buttons are mutually exclusive
 	// i.e If a QTR-1 checkbox is selected, ALL shouldn't appear selected.
