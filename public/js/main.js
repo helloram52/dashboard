@@ -5,8 +5,8 @@ $(document).ready(function() {
 		// Set Years field using the json.
 
 		// Initialize chart visualization
-		chartVisualization = new Visualization;
-		chartVisualization.init(jsonData);
+		chartVisualization = new Visualization();
+		chartVisualization.init(jsonData, '#canvas-div');
 	});
 
 	// Handle Qtr/Year checkbox clicks
