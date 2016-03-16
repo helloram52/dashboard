@@ -2,6 +2,12 @@
  * This file contains all the utility functions
  */
 
+var debug = true;
+function Log(logMsg) {
+	if(debug)
+		console.log(logMsg);
+}
+
 function getSortedKeys(object) {
 	var keys = [];
 	for(var key in obj) {

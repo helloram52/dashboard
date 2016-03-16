@@ -48,10 +48,12 @@ block content
 		.container
 			#year-btn-wrapper
 				div(class="btn-group btn-group-vertical year-group" data-toggle="buttons")
-					label(class="btn btn-primary active")
+					label(class="btn btn-primary")
 						<input type="checkbox" id="year-all">ALL
-					for year in years
-						label(class="btn btn-primary active")
+					each year,index in years
+						// Set the most recent year as active
+						- var activeClass = index == 0 ? ' active' : ''
+						label(class="btn btn-primary" + activeClass)
 							input(type="checkbox" id=year)
 							| #{year}
 	.container

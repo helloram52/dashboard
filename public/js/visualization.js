@@ -83,8 +83,7 @@ var Visualization = function() {
 		args['CUSTOMER'] = [];
 		var chartData = this.getData(args);
 		this.showPieChart();
-		this.showBarChart();
-
+		this.showBarChart(args);
 	},
 
 	this.getAllData = function(currentYear) {

@@ -68,13 +68,14 @@ $(document).ready(function() {
 
 		var checkboxID = checkbox.attr('id');
 		var state = self.hasClass('active');
+		Log('checkboxID: ' + checkboxID);
 
 		// If it's a month button, just update the respective quarter(s).
 		if(self.parent().hasClass('month-group')) {
 			updateQuarter(checkboxID, self.hasClass('active'));
 			preserveMonthValidity();
 		}
-		else {
+		else if(self.parent().hasClass('qtr-group')) {
 			// If non-ALL QTR checkboxes are selected, uncheck 'ALL' checkbox
 			if (checkboxID.match(/all/) == null) {
 				//alert('checkbox clicked');
@@ -99,10 +100,30 @@ $(document).ready(function() {
 			var selectedQuarters = getSelectedQuarters();
 			// Preserve the validity of the quarter selections/unselections
 			// when a qtr-group button is set active/inactive.
-			if(self.parent().hasClass('qtr-group'))
-				preserveQuarterValidity(selectedQuarters);
+			preserveQuarterValidity(selectedQuarters);
 		}
-
+		else if(self.parent().hasClass('year-group')) {
+			// If non-ALL QTR checkboxes are selected, uncheck 'ALL' checkbox
+			if (checkboxID.match(/all/) == null) {
+				Log('all year clicked');
+				var allCheckbox = self.parent().find(":first")
+				if(allCheckbox.hasClass("active")) {
+					allCheckbox.removeClass("active");
+				}
+			}
+			// If ALL year is checked, check all years.
+			else {
+				Log('all year clicked');
+				self.parent().children().each(function(i) {
+					// Skip if this is the ALL checkbox
+					if($(this).is(checkbox))
+						return;
+					if(!$(this).hasClass("active") ) {
+						$(this).addClass("active");
+					}
+				});
+			}
+		}
 		// Let's update the view for every year/month update
 		gatherMonthYearsDataAndUpdateVisualization();
 		$(this).dequeue();
@@ -112,7 +133,14 @@ $(document).ready(function() {
 function gatherMonthYearsDataAndUpdateVisualization() {
 	var selectedMonths = getSelectedMonths();
 	var selectedYears = getSelectedYears();
+	if(selectedMonths.length == 0 || selectedYears.length == 0)
+		return;
 
+	// Convert worded months i.e. 'jan' to '1'
+	for(var i=0;i<selectedMonths.length;i++)
+		selectedMonths[i] = monthsToIDMap[ selectedMonths[i] ];
+
+	Log('calling viz with params, month: ' + selectedMonths + ' years: ' + selectedYears );
 	chartVisualization.updateView({
 		'month' : selectedMonths,
 		'year' : selectedYears
