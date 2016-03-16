@@ -152,8 +152,14 @@ function gatherMonthYearsDataAndUpdateVisualization() {
 function getSelectedYears() {
 	var selectedQuarters = [];
 	$('.year-group .btn').each(function(index) {
+		var yearInput = $(this).find(':checkbox');
+		var yearInputID = yearInput.attr('id');
+		// Skip pushing 'ALL' year
+		if(yearInput.match(/all/))
+			return;
+
 		if($(this).hasClass('active'))
-			selectedQuarters.push($(this).find(':checkbox').attr('id'));
+			selectedQuarters.push(yearInputID);
 	});
 
 	return selectedQuarters;
