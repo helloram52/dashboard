@@ -47,7 +47,7 @@ var Visualization = function() {
 		var dataset2 = this.getPieChartData(jsonObject);
 
 		//this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
-		this.UpdateView(jsonObject, ['I','H', 'A'], [2000], [1], []);
+		this.UpdateView(jsonObject, ['I','H', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], [2000], [1], []);
 
 	},
 
@@ -96,6 +96,8 @@ var Visualization = function() {
 			console.log("Expected argument missing!");
 			return {};
 		}
+
+
 
 		//get required data from input object
 		var selectedBusinessUnits = args['BUSSINESSUNIT'];
@@ -298,14 +300,14 @@ var Visualization = function() {
 		var pieWidthTotal = outerRadius * 2;;
 		var pieCenterX = outerRadius + margin/2;
 		var pieCenterY = outerRadius + margin/2;
-		var legendBulletOffset = 30;
-		var legendVerticalOffset = outerRadius - margin;
-		var legendTextOffset = 20;
-		var textVerticalSpace = 20;
+		//var legendBulletOffset = 30;
+		//var legendVerticalOffset = outerRadius - margin;
+		//var legendTextOffset = 20;
+		//var textVerticalSpace = 20;
 
 		var canvasHeight = 0;
 		var pieDrivenHeight = outerRadius*2 + margin*2;
-		var legendTextDrivenHeight = (dataset.length * textVerticalSpace) + margin*2;
+		//var legendTextDrivenHeight = (dataset.length * textVerticalSpace) + margin*2;
 		/*
 		// Autoadjust Canvas Height
 		if (pieDrivenHeight >= legendTextDrivenHeight)
@@ -316,20 +318,12 @@ var Visualization = function() {
 		var x = d3.scale.linear().domain([0, d3.max(dataset, function(d) { return d.data; })]).rangeRound([0, pieWidthTotal]);
 		var y = d3.scale.linear().domain([0, dataset.length]).range([0, (dataset.length * 20)]);
 
-	/*	var tooltip = d3.setlect(selectString)
-			.append('div')
-			.attr('class', 'tooltip');
-
-		tooltip.append('div')
-			.attr('class', 'label');
-	*/
-	//	tooltip.append('div')
-	//		.attr('class', 'data');
-
+		//tool tip
 		var tip = d3.tip()
 				.attr('class', 'd3-tip')
 				.offset([0, 0])
 
+		//handle mouseOver event
 		var synchronizedMouseOver = function(d) {
 			var arc = d3.select(this);
 			var indexValue = arc.attr("index_value");
@@ -338,34 +332,23 @@ var Visualization = function() {
 			var selectedArc = d3.selectAll(arcSelector);
 			selectedArc.style("fill", "Maroon");
 
-			/*var bulletSelector = "." + "pie-" + pieName + "-legendBullet-" + indexValue;
-			var selectedLegendBullet = d3.selectAll(bulletSelector);
-			selectedLegendBullet.style("fill", "Maroon");
-
-			var textSelector = "." + "pie-" + pieName + "-legendText-" + indexValue;
-			var selectedLegendText = d3.selectAll(textSelector);
-			selectedLegendText.style("fill", "Maroon");*/
-
 			var total = d3.sum(dataset.map(function(d) {
 				return d.data;
 			}));
 
 			var percent = 0;
-			if(total)
-				percent = Math.round(1000 * d.data / total) / 10;
 
-			//console.log(d.value);
+			if(total)
+				percent = Math.round(1000 * d.data.data / total) / 10;
+
+			//display percent value in tool tip for the seleceted arc
 			tip.html(function(b) {
-				return "<strong>"+d.data.label+":</strong> <span style='color:red'>" + d.data.data + "</span>";
+				return "<strong>"+d.data.label+":</strong> <span style='color:red'>" + percent + "%</span>";
 			})
-			//tooltip.select('.label').html(d.label);
-		//	tooltip.select('.data').html(d.data);
-			//tooltip.select('.percent').html(percent + '%'); 
-			//tooltip.style('display', 'block');
 			tip.show();
 		};
 
-
+		//handle mouseOut event
 		var synchronizedMouseOut = function(d) {
 			var arc = d3.select(this);
 			var indexValue = arc.attr("index_value");
@@ -375,25 +358,14 @@ var Visualization = function() {
 			var colorValue = selectedArc.attr("color_value");
 			selectedArc.style("fill", colorValue);
 
-			/*var bulletSelector = "." + "pie-" + pieName + "-legendBullet-" + indexValue;
-			var selectedLegendBullet = d3.selectAll(bulletSelector);
-			var colorValue = selectedLegendBullet.attr("color_value");
-			selectedLegendBullet.style("fill", colorValue);
-
-			var textSelector = "." + "pie-" + pieName + "-legendText-" + indexValue;
-			var selectedLegendText = d3.selectAll(textSelector);
-			selectedLegendText.style("fill", "Blue");*/
-
-			// Remove the tool tip
-			//tooltip.style('display', 'none');
 			tip.hide();
 		};
 		
+		/*	
 		var synchronizedMouseMove = function(d) {
 			tip.style('top', (d3.event.layerY + 1) + 'px')
-				.style('left', (d3.event.layerX + 1) + 'px');
-
-		}
+				.style('left', (d3.event.layerX + 1) + 'px'); 
+		} */
 		
 		var tweenPie = function (b) {
 			b.innerRadius = 0;
@@ -415,7 +387,7 @@ var Visualization = function() {
 			.append("svg:g") //make a group to hold our pie chart
 			.attr("transform", "translate(" + pieCenterX + "," + pieCenterY + ")") // Set center of pie
 
-		canvas.call(tip);
+		canvas.call(tip); //attach tip to canvas div
 		// Define an arc generator. This will create <path> elements for using arc data.
 		var arc = d3.svg.arc()
 			.innerRadius(innerRadius) // Causes center of pie to be hollow
@@ -459,16 +431,14 @@ var Visualization = function() {
 		arcs.append("svg:path")
 			// Set the color for each slice to be chosen from the color function defined above
 			// This creates the actual SVG path using the associated data (pie) with the arc drawing function
-			//.attr("fill", function(d, i) { return colorScale(i); } )
 			.style("fill", function(d, i) { return colorScale(i); } )
 			.attr("color_value", function(d, i) { return colorScale(i); }) // Bar fill color...
 			.attr("index_value", function(d, i) { return "index-" + i; })
 			.attr("class", function(d, i) { return "pie-" + pieName + "-arc-index-" + i; })
-			//.style("stroke", "White" )
 			.attr("d", arc)
 			.on('mouseover', synchronizedMouseOver)
 			.on("mouseout", synchronizedMouseOut)
-			.on("mousemove", synchronizedMouseMove)
+			//.on("mousemove", synchronizedMouseMove)
 			.transition()
 			.ease("bounce")
 			.duration(200)
@@ -494,44 +464,7 @@ var Visualization = function() {
 			var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
 			return a > 90 ? a - 180 : a;
 		}
-		/*
-		// Plot the bullet circles...
-		canvas.selectAll("circle")
-			.data(dataset).enter().append("svg:circle") // Append circle elements
-			.attr("cx", pieWidthTotal + legendBulletOffset)
-			.attr("cy", function(d, i) { return i*textVerticalSpace - legendVerticalOffset; } )
-			.attr("stroke-width", ".5")
-			.style("fill", function(d, i) { return colorScale(i); }) // Bullet fill color
-			.attr("r", 5)
-			.attr("color_value", function(d, i) { return colorScale(i); }) // Bar fill color...
-			.attr("index_value", function(d, i) { return "index-" + i; })
-			.attr("class", function(d, i) { return "pie-" + pieName + "-legendBullet-index-" + i; })
-			.on('mouseover', synchronizedMouseOver)
-			.on("mouseout", synchronizedMouseOut);
-
-		// Create hyper linked text at right that acts as label key...
-		canvas.selectAll("a.legend_link")
-			.data(dataset) // Instruct to bind dataset to text elements
-			.enter().append("svg:a") // Append legend elements
-			.attr("xlink:href", function(d) {
-				return d.link;
-			})
-			.append("text")
-				.attr("text-anchor", "center")
-				.attr("x", pieWidthTotal + legendBulletOffset + legendTextOffset)
-				//.attr("y", function(d, i) { return legendOffset + i*20 - 10; })
-			//.attr("cy", function(d, i) {    return i*textVerticalSpace - legendVerticalOffset; } )
-				.attr("y", function(d, i) { return i*textVerticalSpace - legendVerticalOffset; } )
-				.attr("dx", 0)
-				.attr("dy", "5px") // Controls padding to place text in alignment with bullets
-				.text(function(d) { return d.legendLabel;})
-				.attr("color_value", function(d, i) { return colorScale(i); }) // Bar fill color...
-				.attr("index_value", function(d, i) { return "index-" + i; })
-				.attr("class", function(d, i) { return "pie-" + pieName + "-legendText-index-" + i; })
-				.style("fill", "Blue")
-				.style("font", "normal 1.5em Arial")
-				.on('mouseover', synchronizedMouseOver)
-				.on("mouseout", synchronizedMouseOut); */
+		
 	},
 
 	this.destroy = function() {
