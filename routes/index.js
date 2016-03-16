@@ -10,10 +10,17 @@ var outputFile='./public/data/processeddata.json';
 router.get('/', function(request, response) {
 	//if processed JSON doesn't exist, create one before rendering
 	if(!utilities.fileExists(outputFile)) {
-		var inputFile='./public/data/data.json';
+		var inputFile = './public/data/data.json';
 		utilities.processData(inputFile, outputFile);
 	}
-	response.render('index', { title: 'D3 visualization demo' });
+
+	var yearList = ['2003', '2004', '2005'];
+	//console.log('yearlist type:' + typeof yearlist);
+
+	response.render('index', {
+		title: 'D3 visualization demo',
+		years : yearList
+	});
 });
 
 router.get('/getGraphJSON', function(request, response) {

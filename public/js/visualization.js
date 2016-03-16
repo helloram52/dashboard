@@ -48,7 +48,7 @@ var Visualization = function() {
 
 		//this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
 		//this.UpdateView(jsonObject, ['I','H'], [2000], [1], [15,12,1]);
-
+		this.updateView(jsonObject, ['I','H', 'A'], [2000], [1], []);
 	},
 
 	this.parseData = function() {
