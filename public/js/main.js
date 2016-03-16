@@ -155,7 +155,7 @@ function getSelectedYears() {
 		var yearInput = $(this).find(':checkbox');
 		var yearInputID = yearInput.attr('id');
 		// Skip pushing 'ALL' year
-		if(yearInput.match(/all/))
+		if(yearInputID.match(/all/))
 			return;
 
 		if($(this).hasClass('active'))

@@ -63,12 +63,14 @@ var Visualization = function() {
 	
 	this.showBarChart =function(barChartData) {
 		if(barChartData != undefined && barChartData.length != 0){
-			this.drawBarChart(barChartData, '#pie-div');
+			$('#bar-div').html("");
+			this.drawBarChart(barChartData, '#bar-div');
 		}
 	},
 
 	this.showPieChart = function(pieChartData) {
 		if(pieChartData != undefined && pieChartData.length != 0) {
+			$('#pie-div').html("");
 			Log('drawing pie chart');
 			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 100, 5, 0);
 		}
