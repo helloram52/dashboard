@@ -384,7 +384,7 @@ var Visualization = function() {
 		};
 
 		var canvasWidth = 700;
-		var pieWidthTotal = outerRadius * 2;;
+		var pieWidthTotal = outerRadius * 2;
 		var pieCenterX = outerRadius + margin/2;
 		var pieCenterY = outerRadius + margin/2;
 		//var legendBulletOffset = 30;
@@ -576,7 +576,7 @@ var Visualization = function() {
 	this.drawBarChart = function(dataset, division){
 		
 		var margin = {top: 20, right: 20, bottom: 30, left: 40},
-		width = 300 - margin.left - margin.right,
+		width = 1000 - margin.left - margin.right,
 		height = 300 - margin.top - margin.bottom;
 		
 		/*var margin = {top: 20, right: 20, bottom: 30, left: 40},
@@ -596,7 +596,7 @@ var Visualization = function() {
 		var yAxis = d3.svg.axis()
 		.scale(y)
 		.orient("left")
-		.ticks(10, "%");
+		.ticks(10, "");
 
 		var svg = d3.select(division).append("svg")
 		.attr("width", width + margin.left + margin.right)
