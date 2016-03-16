@@ -33,6 +33,7 @@ var Visualization = function() {
 		this.canvasSelectorString = canvasSelectorString;
 		this.parseData();
 
+		/*
 		var dataset1 = [
 			{legendLabel: "Legend String 1", label: 'A', magnitude: 51, link: "http://www.if4it.com"},
 			{legendLabel: "Legend String 2", label: 'B', magnitude: 21, link: "http://www.if4it.com/glossary.html"},
@@ -42,18 +43,193 @@ var Visualization = function() {
 			{legendLabel: "Legend String 6", label: 'F', magnitude: 47, link: "http://www.if4it.com"},
 			{legendLabel: "Legend String 7", label: 'G', magnitude: 27, link: "http://www.if4it.com/glossary.html"}
 		];
-
+		*/
 		var dataset2 = this.getPieChartData(jsonObject);
 
-		this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
+		//this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
+		this.UpdateView(jsonObject, ['I','H', 'A'], [2000], [1], []);
+
 	},
 
 	this.parseData = function() {
 
 	},
 
-	this.UpdateView = function(yearObject, monthObject) {
+	this.UpdateView = function(jsonObject, businessUnits, years, months, customers) {
 
+		var args={'BUSSINESSUNIT' : businessUnits, 'YEAR': years, 'MONTH' : months, 'CUSTOMER': customers};
+
+		var result=this.getData(jsonObject, args);
+		console.log(result);
+		
+		if(result != {} && result['PIECHART'].length != 0){
+			this.drawPieChart("Revenue", result['PIECHART'], this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);	
+		}
+		/*
+		if(result != {} && result['BARCHART'].length != 0){
+
+		}
+
+		if(result != {} && result['CLUSTERCHART'].length != 0){
+			
+		}
+
+		*/
+
+	},
+
+	/*
+	 * Parses given input json to fetch data that .
+	 * ChartData={
+	 *	'BARCHART' : {label: <customer>, revenue: <revenue>},
+	 *	'PIECHART' : {label: <BusinessUnit>, revenue: <revenue>},
+	 *	'CLUSTERCHART' : {label: <country>, revenue: <revenue>}
+	 * };
+	 */
+	this.getData = function(inputData, args) {
+
+		//verify whether expected fields are present in arguments
+		var fields = ['BUSSINESSUNIT', 'YEAR', 'MONTH', 'CUSTOMER'];
+		var mandatoryFields = ['BUSSINESSUNIT', 'YEAR', 'MONTH'];
+
+		if(!requireFields(args, fields, mandatoryFields)){
+			console.log("Expected argument missing!");
+			return {};
+		}
+
+		//get required data from input object
+		var selectedBusinessUnits = args['BUSSINESSUNIT'];
+		var selectedYears = args['YEAR'];
+		var selectedMonths = args['MONTH'];
+		var selectedCustomers = args['CUSTOMER'];
+		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByCountry = 0;
+		var chartData = {};
+		var pieChartDataArray = [], barChartDataArray = [], clusterChartDataArray = [];
+		var customerJSON = {};
+		var countryJSON = {};
+
+		//check whether arguments have valid data
+		if(args['CUSTOMER'].length == 0) {
+			//iterate the inputData for all customers and compose output for pieChart, Barchart and clusterChart
+			for(var busUnit in selectedBusinessUnits) {
+				var revenueByBusinessUnit = 0;
+				//for each year accumulate the revenue for charts 
+				for(var year in selectedYears) {
+					//for each month accumulate the revenue for charts
+					for(var month in selectedMonths) {
+						revenueByBusinessUnit += inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]]['TOTAL'];
+						var customers = inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]];
+						for(var customer in customers){
+							//gather data for bar chart
+							if(customer != 'TOTAL'){
+								
+								revenueByCustomer = customers[customer]['TOTAL'];
+								
+								if(customerJSON.hasOwnProperty(customer)){
+									revenueByCustomer += customerJSON[customer];
+									customerJSON[customer] = revenueByCustomer;
+								}
+								 else {
+									customerJSON[customer] = revenueByCustomer;
+								}
+								//gather data for cluster chart
+								for(var country in customers[customer]){
+
+									if(country != 'TOTAL'){
+										revenueByCountry = customers[customer][country];
+										if(countryJSON.hasOwnProperty(country)){
+											revenueByCountry += countryJSON[country];
+											countryJSON[country] = revenueByCountry;
+										}
+										else{
+											countryJSON[country] = revenueByCountry;	
+										}
+									}
+								}
+							}
+						}
+					}	
+				}
+				//populate data for pie chart
+				var pieChartData = {};
+				pieChartData['label'] = selectedBusinessUnits[busUnit];
+				pieChartData['data'] = revenueByBusinessUnit;
+				pieChartData['link'] = "";
+				pieChartDataArray[busUnitIndex++] = pieChartData;
+			}
+		}
+		else {
+			//iterate the inputData for selected customers and compose output for pieChart, Barchart and clusterChart
+			for(var busUnit in selectedBusinessUnits) {
+				var revenueByBusinessUnit = 0;
+				//for each year accumulate the revenue for charts 
+				for(var year in selectedYears) {
+					//for each month accumulate the revenue for charts 
+					for(var month in selectedMonths) {
+						revenueByBusinessUnit += inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]]['TOTAL'];
+						var customers = inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]];
+						for(var customerPos in selectedCustomers){
+							var customer = selectedCustomers[customerPos];
+							//gather data for bar chart
+								
+							revenueByCustomer = customers[customer]['TOTAL'];
+							
+							if(customerJSON.hasOwnProperty(customer)){
+								revenueByCustomer += customerJSON[customer];
+								customerJSON[customer] = revenueByCustomer;
+							}
+							 else {
+								customerJSON[customer] = revenueByCustomer;
+							}
+							//gather data for cluster chart
+							for(var country in customers[customer]){
+
+								if(country != 'TOTAL'){
+									revenueByCountry = customers[customer][country];
+									if(countryJSON.hasOwnProperty(country)){
+										revenueByCountry += countryJSON[country];
+										countryJSON[country] = revenueByCountry;
+									}
+									else{
+										countryJSON[country] = revenueByCountry;	
+									}
+								}
+							}
+						}
+					}	
+				}
+				//populate data for pie chart
+				var pieChartData = {};
+				pieChartData['label'] = selectedBusinessUnits[busUnit];
+				pieChartData['data'] = revenueByBusinessUnit;
+				pieChartData['link'] = "";
+				pieChartDataArray[busUnitIndex++] = pieChartData;
+			}
+
+		}
+
+		//populate data for bar chart
+		for(customer in customerJSON){
+			var barChartData = {};
+			barChartData['label'] = customer;
+			barChartData['data'] = customerJSON[customer];
+			barChartDataArray[customerIndex++] = barChartData;
+		}
+
+		//populate data for cluster chart
+		countryIndex =0;
+		for(country in countryJSON){
+			var clusterChartData = {};
+			clusterChartData['label'] = country;
+			clusterChartData['data'] = countryJSON[country];
+			clusterChartDataArray[countryIndex++] = clusterChartData;
+		}
+
+		chartData['PIECHART'] = pieChartDataArray;
+		chartData['BARCHART'] = barChartDataArray;
+		chartData['CLUSTERCHART'] = clusterChartDataArray;
+
+		return chartData;
 	},
 
 	/*
@@ -130,27 +306,29 @@ var Visualization = function() {
 		var canvasHeight = 0;
 		var pieDrivenHeight = outerRadius*2 + margin*2;
 		var legendTextDrivenHeight = (dataset.length * textVerticalSpace) + margin*2;
+		/*
 		// Autoadjust Canvas Height
 		if (pieDrivenHeight >= legendTextDrivenHeight)
 			canvasHeight = pieDrivenHeight;
 		else
-			canvasHeight = legendTextDrivenHeight;
-
-		var x = d3.scale.linear().domain([0, d3.max(dataset, function(d) { return d.magnitude; })]).rangeRound([0, pieWidthTotal]);
+			canvasHeight = legendTextDrivenHeight; */
+		canvasHeight = pieDrivenHeight;
+		var x = d3.scale.linear().domain([0, d3.max(dataset, function(d) { return d.data; })]).rangeRound([0, pieWidthTotal]);
 		var y = d3.scale.linear().domain([0, dataset.length]).range([0, (dataset.length * 20)]);
 
-		var tooltip = d3.select(selectString)
+	/*	var tooltip = d3.setlect(selectString)
 			.append('div')
 			.attr('class', 'tooltip');
 
 		tooltip.append('div')
 			.attr('class', 'label');
+	*/
+	//	tooltip.append('div')
+	//		.attr('class', 'data');
 
-		tooltip.append('div')
-			.attr('class', 'count');
-
-		tooltip.append('div')
-			.attr('class', 'percent');
+		var tip = d3.tip()
+				.attr('class', 'd3-tip')
+				.offset([0, 0])
 
 		var synchronizedMouseOver = function(d) {
 			var arc = d3.select(this);
@@ -160,25 +338,33 @@ var Visualization = function() {
 			var selectedArc = d3.selectAll(arcSelector);
 			selectedArc.style("fill", "Maroon");
 
-			var bulletSelector = "." + "pie-" + pieName + "-legendBullet-" + indexValue;
+			/*var bulletSelector = "." + "pie-" + pieName + "-legendBullet-" + indexValue;
 			var selectedLegendBullet = d3.selectAll(bulletSelector);
 			selectedLegendBullet.style("fill", "Maroon");
 
 			var textSelector = "." + "pie-" + pieName + "-legendText-" + indexValue;
 			var selectedLegendText = d3.selectAll(textSelector);
-			selectedLegendText.style("fill", "Maroon");
+			selectedLegendText.style("fill", "Maroon");*/
 
 			var total = d3.sum(dataset.map(function(d) {
-				return d.magnitude;
+				return d.data;
 			}));
+
 			var percent = 0;
 			if(total)
-				percent = Math.round(1000 * d.magnitude / total) / 10;
-			tooltip.select('.label').html(d.label);
-			tooltip.select('.count').html(d.magnitude); 
-			tooltip.select('.percent').html(percent + '%'); 
-			tooltip.style('display', 'block');
+				percent = Math.round(1000 * d.data / total) / 10;
+
+			//console.log(d.value);
+			tip.html(function(b) {
+				return "<strong>"+d.data.label+":</strong> <span style='color:red'>" + d.data.data + "</span>";
+			})
+			//tooltip.select('.label').html(d.label);
+		//	tooltip.select('.data').html(d.data);
+			//tooltip.select('.percent').html(percent + '%'); 
+			//tooltip.style('display', 'block');
+			tip.show();
 		};
+
 
 		var synchronizedMouseOut = function(d) {
 			var arc = d3.select(this);
@@ -189,24 +375,26 @@ var Visualization = function() {
 			var colorValue = selectedArc.attr("color_value");
 			selectedArc.style("fill", colorValue);
 
-			var bulletSelector = "." + "pie-" + pieName + "-legendBullet-" + indexValue;
+			/*var bulletSelector = "." + "pie-" + pieName + "-legendBullet-" + indexValue;
 			var selectedLegendBullet = d3.selectAll(bulletSelector);
 			var colorValue = selectedLegendBullet.attr("color_value");
 			selectedLegendBullet.style("fill", colorValue);
 
 			var textSelector = "." + "pie-" + pieName + "-legendText-" + indexValue;
 			var selectedLegendText = d3.selectAll(textSelector);
-			selectedLegendText.style("fill", "Blue");
+			selectedLegendText.style("fill", "Blue");*/
 
 			// Remove the tool tip
-			tooltip.style('display', 'none');
+			//tooltip.style('display', 'none');
+			tip.hide();
 		};
-
+		
 		var synchronizedMouseMove = function(d) {
-			tooltip.style('top', (d3.event.layerY + 10) + 'px')
-				.style('left', (d3.event.layerX + 10) + 'px');
-		}
+			tip.style('top', (d3.event.layerY + 1) + 'px')
+				.style('left', (d3.event.layerX + 1) + 'px');
 
+		}
+		
 		var tweenPie = function (b) {
 			b.innerRadius = 0;
 			var i = d3.interpolate({
@@ -227,6 +415,7 @@ var Visualization = function() {
 			.append("svg:g") //make a group to hold our pie chart
 			.attr("transform", "translate(" + pieCenterX + "," + pieCenterY + ")") // Set center of pie
 
+		canvas.call(tip);
 		// Define an arc generator. This will create <path> elements for using arc data.
 		var arc = d3.svg.arc()
 			.innerRadius(innerRadius) // Causes center of pie to be hollow
@@ -237,12 +426,12 @@ var Visualization = function() {
 		// values are Strings which we coerce to Numbers.
 		var pie = d3.layout.pie()
 			.value(function(d) {
-				return d.magnitude;
+				return d.data;
 			});
 
 		if(sortArcs == 1) {
 			pie.sort(function(a, b) {
-				return b.magnitude - a.magnitude;
+				return b.data - a.data;
 			});
 		}
 		else {
@@ -270,11 +459,12 @@ var Visualization = function() {
 		arcs.append("svg:path")
 			// Set the color for each slice to be chosen from the color function defined above
 			// This creates the actual SVG path using the associated data (pie) with the arc drawing function
-			.attr("fill", function(d, i) { return colorScale(i); } )
+			//.attr("fill", function(d, i) { return colorScale(i); } )
+			.style("fill", function(d, i) { return colorScale(i); } )
 			.attr("color_value", function(d, i) { return colorScale(i); }) // Bar fill color...
 			.attr("index_value", function(d, i) { return "index-" + i; })
 			.attr("class", function(d, i) { return "pie-" + pieName + "-arc-index-" + i; })
-			.style("stroke", "White" )
+			//.style("stroke", "White" )
 			.attr("d", arc)
 			.on('mouseover', synchronizedMouseOver)
 			.on("mouseout", synchronizedMouseOut)
@@ -304,7 +494,7 @@ var Visualization = function() {
 			var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
 			return a > 90 ? a - 180 : a;
 		}
-
+		/*
 		// Plot the bullet circles...
 		canvas.selectAll("circle")
 			.data(dataset).enter().append("svg:circle") // Append circle elements
@@ -341,7 +531,7 @@ var Visualization = function() {
 				.style("fill", "Blue")
 				.style("font", "normal 1.5em Arial")
 				.on('mouseover', synchronizedMouseOver)
-				.on("mouseout", synchronizedMouseOut);
+				.on("mouseout", synchronizedMouseOut); */
 	},
 
 	this.destroy = function() {
