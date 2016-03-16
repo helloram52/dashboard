@@ -39,8 +39,7 @@ var Visualization = function() {
 		this.storeBusinessUnits();
 		var currentYear = this.jsonObject['YEARS'][0];
 
-		var result=this.getAllData(currentYear);
-
+		var result = this.getAllData(currentYear);
 		console.log(result);
 
 		this.showPieChart(result['PIECHART']);
@@ -68,22 +67,23 @@ var Visualization = function() {
 		}
 	},
 
-	this.showPieChart =function(pieChartData) {
-		if(pieChartData != undefined && pieChartData.length != 0){
+	this.showPieChart = function(pieChartData) {
+		if(pieChartData != undefined && pieChartData.length != 0) {
+			Log('drawing pie chart');
 			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 100, 5, 0);
 		}
 	},
 
 	this.updateView = function(args) {
-
 		//case 1: month or year is updated:
 		//	a. refresh data for all the charts by calling getData()
 		//  b. redraw all charts
 		args['BUSSINESSUNIT'] = this.businessUnits;
 		args['CUSTOMER'] = [];
 		var chartData = this.getData(args);
-		this.showPieChart();
-		this.showBarChart(args);
+		Log('args: ' +  chartData);
+		this.showPieChart(chartData['PIECHART']);
+		this.showBarChart(chartData['BARCHART']);
 	},
 
 	this.getAllData = function(currentYear) {

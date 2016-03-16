@@ -46,6 +46,7 @@ $(document).ready(function() {
 		// Initialize chart visualization
 		chartVisualization = new Visualization();
 		chartVisualization.init(jsonData, '#canvas-div');
+		gatherMonthYearsDataAndUpdateVisualization();
 	});
 
 	$('.btn-group .btn').on('click', function() {
@@ -142,8 +143,8 @@ function gatherMonthYearsDataAndUpdateVisualization() {
 
 	Log('calling viz with params, month: ' + selectedMonths + ' years: ' + selectedYears );
 	chartVisualization.updateView({
-		'month' : selectedMonths,
-		'year' : selectedYears
+		'MONTH' : selectedMonths,
+		'YEAR' : selectedYears
 	});
 }
 

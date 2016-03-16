@@ -8,6 +8,14 @@ function Log(logMsg) {
 		console.log(logMsg);
 }
 
+function isObject (obj) {
+   return obj && (typeof obj  === "object");
+}
+
+function isArray (obj) { 
+  return isObject(obj) && (obj instanceof Array);
+}
+
 function getSortedKeys(object) {
 	var keys = [];
 	for(var key in obj) {
@@ -33,18 +41,28 @@ function requireFields(args, fields, mandatoryFields){
 	//check whether field is valid
 	for(var index in fields) {
 
-		if(!args.hasOwnProperty(fields[index])){
+		if(!args.hasOwnProperty(fields[index])) {
+			Log('Invalid Field : ' + fields[index] + ' found.');
 			return false;
 		}
 	}
 
 	for(var index in mandatoryFields) {
-
+		var fieldName = mandatoryFields[index];
 		//check whether mandatory field is not empty
-		if(args.hasOwnProperty(mandatoryFields[index])){
-			
-			if(args[mandatoryFields[index]].length == 0)
-				return false;
+		if(args.hasOwnProperty(fieldName)) {
+			if(isArray(args[fieldName])) {
+				if(args[fieldName].length == 0) {
+					Log('mandatory field : ' + fields[index] + ' found with length zero.');
+					return false;
+				}
+			}
+			else if(isObject(args[fieldName])) {
+				if(args[fieldName].keys().length == 0) {
+					Log('mandatory field : ' + fields[index] + ' found  with key size zero.');
+					return false;
+				}
+			}
 		}
 	}
 	return true;
