@@ -37,8 +37,9 @@ var Visualization = function() {
 		this.jsonObject=jsonObject;
 		//initialise business Units for later use
 		this.storeBusinessUnits();
+		var currentYear = this.jsonObject['YEARS'][0];
 
-		var result=this.getAllData();
+		var result=this.getAllData(currentYear);
 
 		console.log(result);
 
@@ -61,15 +62,14 @@ var Visualization = function() {
 
 	},
 	
-
 	this.showBarChart =function(barChartData) {
-		if(barChartData.length != 0){
+		if(barChartData != undefined && barChartData.length != 0){
 			this.drawBarChart(barChartData, '#pie-div');
 		}
 	},
 
 	this.showPieChart =function(pieChartData) {
-		if(pieChartData.length != 0){
+		if(pieChartData != undefined && pieChartData.length != 0){
 			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 100, 5, 0);
 		}
 	},
@@ -80,13 +80,14 @@ var Visualization = function() {
 		//	a. refresh data for all the charts by calling getData()
 		//  b. redraw all charts
 		args['BUSSINESSUNIT'] = this.businessUnits;
+		args['CUSTOMER'] = [];
 		var chartData = this.getData(args);
 		this.showPieChart();
 		this.showBarChart();
 
 	},
 
-	this.getAllData = function() {
+	this.getAllData = function(currentYear) {
 
 		//get required data from input object
 		var inputData = this.jsonObject['ALLDATA'];
@@ -100,36 +101,35 @@ var Visualization = function() {
 		for(var busUnit in inputData) {
 			var revenueByBusinessUnit = 0;
 			//for each year accumulate the revenue for charts 
-			for(var year in inputData[busUnit]) {
-				//for each month accumulate the revenue for charts
-				for(var month in inputData[busUnit][year]) {
-					revenueByBusinessUnit += inputData[busUnit][year][month]['TOTAL'];
-					var customers = inputData[busUnit][year][month];
-					for(var customer in customers){
-						//gather data for bar chart
-						if(customer != 'TOTAL'){
-							
-							revenueByCustomer = customers[customer]['TOTAL'];
-							
-							if(customerJSON.hasOwnProperty(customer)){
-								revenueByCustomer += customerJSON[customer];
-								customerJSON[customer] = revenueByCustomer;
-							}
-							 else {
-								customerJSON[customer] = revenueByCustomer;
-							}
-							//gather data for cluster chart
-							for(var country in customers[customer]){
+			var year = currentYear;
+			//for each month accumulate the revenue for charts
+			for(var month in inputData[busUnit][year]) {
+				revenueByBusinessUnit += inputData[busUnit][year][month]['TOTAL'];
+				var customers = inputData[busUnit][year][month];
+				for(var customer in customers){
+					//gather data for bar chart
+					if(customer != 'TOTAL'){
+						
+						revenueByCustomer = customers[customer]['TOTAL'];
+						
+						if(customerJSON.hasOwnProperty(customer)){
+							revenueByCustomer += customerJSON[customer];
+							customerJSON[customer] = revenueByCustomer;
+						}
+						 else {
+							customerJSON[customer] = revenueByCustomer;
+						}
+						//gather data for cluster chart
+						for(var country in customers[customer]){
 
-								if(country != 'TOTAL'){
-									revenueByCountry = customers[customer][country];
-									if(countryJSON.hasOwnProperty(country)){
-										revenueByCountry += countryJSON[country];
-										countryJSON[country] = revenueByCountry;
-									}
-									else{
-										countryJSON[country] = revenueByCountry;	
-									}
+							if(country != 'TOTAL'){
+								revenueByCountry = customers[customer][country];
+								if(countryJSON.hasOwnProperty(country)){
+									revenueByCountry += countryJSON[country];
+									countryJSON[country] = revenueByCountry;
+								}
+								else{
+									countryJSON[country] = revenueByCountry;	
 								}
 							}
 						}
