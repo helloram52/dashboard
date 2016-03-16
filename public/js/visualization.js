@@ -27,26 +27,34 @@
 var Visualization = function() {
 	this.data = {};
 	this.canvasSelectorString = '';
+	this.businessUnits=[];
+	this.jsonObject={};
 
 	this.init = function(jsonObject, canvasSelectorString) {
 		this.data = jsonObject;
 		this.canvasSelectorString = canvasSelectorString;
 		this.parseData();
+		this.jsonObject=jsonObject;
+		//initialise business Units for later use
+		this.storeBusinessUnits();
 
-		//var dataset2 = this.getPieChartData(jsonObject);
-		//this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
-		//this.UpdateView(jsonObject, ['I','H'], [2000], [1], [15,12,1]);
-
-
-		//var args={'BUSSINESSUNIT' : businessUnits, 'YEAR': years, 'MONTH' : months, 'CUSTOMER': customers};
-		var result=this.getAllData(jsonObject['ALLDATA']);
+		var result=this.getAllData();
 
 		console.log(result);
 
-		//this.updateView(jsonObject, ['I','H'], [2000], [1], [15,12,1]);
 		this.showPieChart(result['PIECHART']);
 		this.showBarChart(result['BARCHART']);
 		//this.showClusterChart();
+	},
+
+	this.storeBusinessUnits = function() {
+
+		var inputData = this.jsonObject['ALLDATA'];
+		var index = 0;
+		for(var busUnit in inputData){
+			this.businessUnits[index++] = busUnit;
+		}
+	
 	},
 
 	this.parseData = function() {
@@ -66,13 +74,22 @@ var Visualization = function() {
 		}
 	},
 
-	this.updateView = function(jsonObject, businessUnits, years, months, customers) {
+	this.updateView = function(args) {
+
+		//case 1: month or year is updated:
+		//	a. refresh data for all the charts by calling getData()
+		//  b. redraw all charts
+		args['BUSSINESSUNIT'] = this.businessUnits;
+		var chartData = this.getData(args);
+		this.showPieChart();
+		this.showBarChart();
 
 	},
 
-	this.getAllData = function(inputData) {
+	this.getAllData = function() {
 
 		//get required data from input object
+		var inputData = this.jsonObject['ALLDATA'];
 		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByCountry = 0;
 		var chartData = {};
 		var pieChartDataArray = [], barChartDataArray = [], clusterChartDataArray = [];
@@ -158,14 +175,15 @@ var Visualization = function() {
 	 *	'CLUSTERCHART' : {label: <country>, revenue: <revenue>}
 	 * };
 	 */
-	this.getData = function(inputData, args) {
+	this.getData = function(args) {
 
+		var inputData = this.jsonObject['ALLDATA'];
 		//verify whether expected fields are present in arguments
 		var fields = ['BUSSINESSUNIT', 'YEAR', 'MONTH', 'CUSTOMER'];
 		var mandatoryFields = ['BUSSINESSUNIT', 'YEAR', 'MONTH'];
 
 		if(!requireFields(args, fields, mandatoryFields)){
-			console.log("Expected argument missing!");
+			console.log("Visualization.js: getData():-Expected argument missing!");
 			return {};
 		}
 
@@ -608,7 +626,7 @@ var Visualization = function() {
 		.data(dataset)
 		.enter().append("rect")
 		.attr("class", "bar")
-		.attr("x", function(d) { console.log("label:"+d.label+" data:"+d.data); return x(d.label); })
+		.attr("x", function(d) { return x(d.label); })
 		.attr("width", x.rangeBand())
 		.attr("y", function(d) { return y(d.data); })
 		.attr("height", function(d) { return height - y(d.data); });
