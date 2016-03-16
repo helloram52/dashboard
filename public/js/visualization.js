@@ -33,49 +33,123 @@ var Visualization = function() {
 		this.canvasSelectorString = canvasSelectorString;
 		this.parseData();
 
-		/*
-		var dataset1 = [
-			{legendLabel: "Legend String 1", label: 'A', magnitude: 51, link: "http://www.if4it.com"},
-			{legendLabel: "Legend String 2", label: 'B', magnitude: 21, link: "http://www.if4it.com/glossary.html"},
-			{legendLabel: "Legend String 3", label: 'C', magnitude: 31, link: "http://www.if4it.com/resources.html"},
-			{legendLabel: "Legend String 4", label: 'D', magnitude: 14, link: "http://www.if4it.com/taxonomy.html"},
-			{legendLabel: "Legend String 5", label: 'E', magnitude: 19, link: "http://www.if4it.com/disciplines.html"},
-			{legendLabel: "Legend String 6", label: 'F', magnitude: 47, link: "http://www.if4it.com"},
-			{legendLabel: "Legend String 7", label: 'G', magnitude: 27, link: "http://www.if4it.com/glossary.html"}
-		];
-		*/
-		var dataset2 = this.getPieChartData(jsonObject);
-
+		//var dataset2 = this.getPieChartData(jsonObject);
 		//this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
 		//this.UpdateView(jsonObject, ['I','H'], [2000], [1], [15,12,1]);
-		this.updateView(jsonObject, ['I','H', 'A'], [2000], [1], []);
+
+
+		//var args={'BUSSINESSUNIT' : businessUnits, 'YEAR': years, 'MONTH' : months, 'CUSTOMER': customers};
+		var result=this.getAllData(jsonObject['ALLDATA']);
+
+		console.log(result);
+
+		//this.updateView(jsonObject, ['I','H'], [2000], [1], [15,12,1]);
+		this.showPieChart(result['PIECHART']);
+		this.showBarChart(result['BARCHART']);
+		//this.showClusterChart();
 	},
 
 	this.parseData = function() {
 
 	},
+	
 
-	this.UpdateView = function(jsonObject, args) {
+	this.showBarChart =function(barChartData) {
 
-		//var args={'BUSSINESSUNIT' : businessUnits, 'YEAR': years, 'MONTH' : months, 'CUSTOMER': customers};
-
-		var result=this.getData(jsonObject, args);
-		console.log(result);
-		
-		if(result != {} && result['PIECHART'].length != 0){
-			this.drawPieChart("Revenue", result['PIECHART'], '#pie-div', "colorScale20", 10, 100, 5, 0);	
+		if(barChartData.length != 0){
+			this.drawBarChart(barChartData, '#pie-div');
 		}
-		
-		if(result != {} && result['BARCHART'].length != 0){
-			this.drawBarChart(result['BARCHART'], "#bar-div");
+	},
+
+	this.showPieChart =function(pieChartData) {
+
+		if(pieChartData.length != 0){
+			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 100, 5, 0);
 		}
-		/*
-		if(result != {} && result['CLUSTERCHART'].length != 0){
-			
+	},
+
+	this.updateView = function(jsonObject, businessUnits, years, months, customers) {
+
+	},
+
+	this.getAllData = function(inputData) {
+
+		//get required data from input object
+		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByCountry = 0;
+		var chartData = {};
+		var pieChartDataArray = [], barChartDataArray = [], clusterChartDataArray = [];
+		var customerJSON = {};
+		var countryJSON = {};
+
+		//iterate the inputData for all customers and compose output for pieChart, Barchart and clusterChart
+		for(var busUnit in inputData) {
+			var revenueByBusinessUnit = 0;
+			//for each year accumulate the revenue for charts 
+			for(var year in inputData[busUnit]) {
+				//for each month accumulate the revenue for charts
+				for(var month in inputData[busUnit][year]) {
+					revenueByBusinessUnit += inputData[busUnit][year][month]['TOTAL'];
+					var customers = inputData[busUnit][year][month];
+					for(var customer in customers){
+						//gather data for bar chart
+						if(customer != 'TOTAL'){
+							
+							revenueByCustomer = customers[customer]['TOTAL'];
+							
+							if(customerJSON.hasOwnProperty(customer)){
+								revenueByCustomer += customerJSON[customer];
+								customerJSON[customer] = revenueByCustomer;
+							}
+							 else {
+								customerJSON[customer] = revenueByCustomer;
+							}
+							//gather data for cluster chart
+							for(var country in customers[customer]){
+
+								if(country != 'TOTAL'){
+									revenueByCountry = customers[customer][country];
+									if(countryJSON.hasOwnProperty(country)){
+										revenueByCountry += countryJSON[country];
+										countryJSON[country] = revenueByCountry;
+									}
+									else{
+										countryJSON[country] = revenueByCountry;	
+									}
+								}
+							}
+						}
+					}
+				}	
+			}
+			//populate data for pie chart
+			var pieChartData = {};
+			pieChartData['label'] = busUnit;
+			pieChartData['data'] = revenueByBusinessUnit;
+			pieChartData['link'] = "";
+			pieChartDataArray[busUnitIndex++] = pieChartData;
+		}
+		//populate data for bar chart
+		for(customer in customerJSON){
+			var barChartData = {};
+			barChartData['label'] = customer;
+			barChartData['data'] = customerJSON[customer];
+			barChartDataArray[customerIndex++] = barChartData;
 		}
 
-		*/
+		//populate data for cluster chart
+		countryIndex =0;
+		for(country in countryJSON){
+			var clusterChartData = {};
+			clusterChartData['label'] = country;
+			clusterChartData['data'] = countryJSON[country];
+			clusterChartDataArray[countryIndex++] = clusterChartData;
+		}
 
+		chartData['PIECHART'] = pieChartDataArray;
+		chartData['BARCHART'] = barChartDataArray;
+		chartData['CLUSTERCHART'] = clusterChartDataArray;
+
+		return chartData;
 	},
 
 	/*
@@ -354,7 +428,7 @@ var Visualization = function() {
 				{ value: 1E18, symbol: "E" },
 				{ value: 1E15, symbol: "P" },
 				{ value: 1E12, symbol: "T" },
-				{ value: 1E9,  symbol: "G" },
+				{ value: 1E9,  symbol: "B" },
 				{ value: 1E6,  symbol: "M" },
 				{ value: 1E3,  symbol: "k" }
 				], i;
