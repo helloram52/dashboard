@@ -47,7 +47,7 @@ var Visualization = function() {
 		var dataset2 = this.getPieChartData(jsonObject);
 
 		//this.drawPieChart("Revenue", dataset1, this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);
-		this.UpdateView(jsonObject, ['I','H', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'], [2000], [1], []);
+		//this.UpdateView(jsonObject, ['I','H'], [2000], [1], [15,12,1]);
 
 	},
 
@@ -55,21 +55,21 @@ var Visualization = function() {
 
 	},
 
-	this.UpdateView = function(jsonObject, businessUnits, years, months, customers) {
+	this.UpdateView = function(jsonObject, args) {
 
-		var args={'BUSSINESSUNIT' : businessUnits, 'YEAR': years, 'MONTH' : months, 'CUSTOMER': customers};
+		//var args={'BUSSINESSUNIT' : businessUnits, 'YEAR': years, 'MONTH' : months, 'CUSTOMER': customers};
 
 		var result=this.getData(jsonObject, args);
 		console.log(result);
 		
 		if(result != {} && result['PIECHART'].length != 0){
-			this.drawPieChart("Revenue", result['PIECHART'], this.canvasSelectorString, "colorScale20", 10, 100, 5, 0);	
+			this.drawPieChart("Revenue", result['PIECHART'], '#pie-div', "colorScale20", 10, 100, 5, 0);	
+		}
+		
+		if(result != {} && result['BARCHART'].length != 0){
+			this.drawBarChart(result['BARCHART'], "#bar-div");
 		}
 		/*
-		if(result != {} && result['BARCHART'].length != 0){
-
-		}
-
 		if(result != {} && result['CLUSTERCHART'].length != 0){
 			
 		}
@@ -96,8 +96,6 @@ var Visualization = function() {
 			console.log("Expected argument missing!");
 			return {};
 		}
-
-
 
 		//get required data from input object
 		var selectedBusinessUnits = args['BUSSINESSUNIT'];
@@ -340,14 +338,33 @@ var Visualization = function() {
 
 			if(total)
 				percent = Math.round(1000 * d.data.data / total) / 10;
+			var tableMessage = "<table border='2' align='center'><tr><td >BU</td><td bgcolor='green' align='center'>"+ d.data.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data.data, 1) +"</td></tr><tr><td>Percentage</td><td bgcolor='green' align='center'>"+ percent +"%</td></tr></table>";
 
 			//display percent value in tool tip for the seleceted arc
 			tip.html(function(b) {
-				return "<strong>"+d.data.label+":</strong> <span style='color:red'>" + percent + "%</span>";
+				var message = "<strong>"+d.data.label+":</strong> <span style='color:red'>" + percent + "%</span>"+" <br /><strong> Revenue:</strong> <span style='color:red'>" + formatCurrency(d.data.data, 1) + "</span>";
+				return tableMessage;
+						//<br> <strong>"+ Revenue+":</strong> <span style='color:red'>" + d.data.dat + "%</span>";
 			})
 			tip.show();
 		};
 
+		function formatCurrency(num, digits) {
+			var si = [
+				{ value: 1E18, symbol: "E" },
+				{ value: 1E15, symbol: "P" },
+				{ value: 1E12, symbol: "T" },
+				{ value: 1E9,  symbol: "G" },
+				{ value: 1E6,  symbol: "M" },
+				{ value: 1E3,  symbol: "k" }
+				], i;
+			for (i = 0; i < si.length; i++) {
+				if (num >= si[i].value) {
+					return (num / si[i].value).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, "$1") + si[i].symbol;
+				}
+			}
+			return num.toString();
+		}
 		//handle mouseOut event
 		var synchronizedMouseOut = function(d) {
 			var arc = d3.select(this);
@@ -466,6 +483,65 @@ var Visualization = function() {
 		}
 		
 	},
+
+	this.drawBarChart = function(dataset, division){
+		
+		var margin = {top: 20, right: 20, bottom: 30, left: 40},
+		width = 300 - margin.left - margin.right,
+		height = 300 - margin.top - margin.bottom;
+		
+		/*var margin = {top: 20, right: 20, bottom: 30, left: 40},
+		width = 960 - margin.left - margin.right,
+		height = 500 - margin.top - margin.bottom;
+		*/
+		var x = d3.scale.ordinal()
+		.rangeRoundBands([0, width], .1);
+
+		var y = d3.scale.linear()
+		.range([height, 0]);
+
+		var xAxis = d3.svg.axis()
+		.scale(x)
+		.orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left")
+		.ticks(10, "%");
+
+		var svg = d3.select(division).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		x.domain(dataset.map(function(d) { return d.label; }));
+		y.domain([0, d3.max(dataset, function(d) { return d.data; })]);
+
+		svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis);
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text("Revenue");
+		svg.selectAll(".bar")
+		.data(dataset)
+		.enter().append("rect")
+		.attr("class", "bar")
+		.attr("x", function(d) { console.log("label:"+d.label+" data:"+d.data); return x(d.label); })
+		.attr("width", x.rangeBand())
+		.attr("y", function(d) { return y(d.data); })
+		.attr("height", function(d) { return height - y(d.data); });
+
+	}
 
 	this.destroy = function() {
 

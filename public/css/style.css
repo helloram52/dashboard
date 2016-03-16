@@ -85,6 +85,35 @@ path {
 	position: relative;
 }
 
+
+#pie-div {
+/*
+	outline: 1px solid black;
+	background: transparent;
+*/
+	height: 300px;
+	position: relative;
+}
+
+#bar-div {
+/*
+	outline: 1px solid black;
+	background: transparent;
+*/
+	height: 300px;
+	float: right;
+	position: relative;
+}
+
+#cluster-div {
+/*
+	outline: 1px solid black;
+	background: transparent;
+*/
+	height: 300px;
+	position: relative;
+}
+
 #footer {
 	bottom: 0;
 	color: black;
@@ -126,24 +155,9 @@ svg {
 	display: block;
 }
 
-.tooltip {
-  background: #eee;
-  box-shadow: 0 0 5px #999999;
-  color: #333;
-  display: none;
-  font-size: 12px;
-  left: 130px;
-  padding: 10px;
-  position: absolute;
-  text-align: center;
-  top: 95px;
-  width: 80px;
-  z-index: 10;
-}
-
 .d3-tip {
   line-height: 1;
-  font-weight: bold;
+  font-weight: normal;
   padding: 12px;
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
@@ -154,7 +168,7 @@ svg {
 .d3-tip:after {
   box-sizing: border-box;
   display: inline;
-  font-size: 10px;
+  font-size: 5px;
   width: 100%;
   line-height: 1;
   color: rgba(0, 0, 0, 0.8);
@@ -168,4 +182,27 @@ svg {
   margin: -1px 0 0 0;
   top: 100%;
   left: 0;
+}
+
+.bar {
+	fill: 'steelblue';
+}
+
+.bar:hover {
+	fill: 'brown';
+}
+
+.axis {
+	font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.x.axis path {
+	display: none;
 }
