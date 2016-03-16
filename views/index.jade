@@ -7,9 +7,7 @@ block content
 		hr
 	#qtr-wrapper
 		.container
-			span Quarters
-			br
-			div(class="btn-group" data-toggle="buttons")
+			div(class="btn-group qtr-group" data-toggle="buttons")
 				label(class="btn btn-primary active")
 					<input type="checkbox" id="qtr-all"> ALL
 				label(class="btn btn-primary")
@@ -21,39 +19,35 @@ block content
 				label(class="btn btn-primary")
 					<input type="checkbox" id="qtr4"> QTR-4
 			br
-			span Months
-			br
 			div(class="btn-group month-group" data-toggle="buttons")
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="jan"> Jan
+					<input type="checkbox" id="jan" value=1> Jan
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="feb"> Feb
+					<input type="checkbox" id="feb" value=2> Feb
 				label(class="btn btn-primary active")
-					<input type="checkbox" id=""> Mar
+					<input type="checkbox" id="mar" value=3> Mar
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="apr"> Apr
+					<input type="checkbox" id="apr" value=4> Apr
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="may"> May
+					<input type="checkbox" id="may" value=5> May
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="jun"> Jun
+					<input type="checkbox" id="jun" value=6> Jun
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="jul"> Jul
+					<input type="checkbox" id="jul" value=7> Jul
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="aug"> Aug
+					<input type="checkbox" id="aug" value=8> Aug
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="sept"> Sept
+					<input type="checkbox" id="sept" value=9> Sept
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="oct"> Oct
+					<input type="checkbox" id="oct" value=10> Oct
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="nov"> Nov
+					<input type="checkbox" id="nov" value=11> Nov
 				label(class="btn btn-primary active")
-					<input type="checkbox" id="dec"> Dec
+					<input type="checkbox" id="dec" value=12> Dec
 	#year-wrapper
 		.container
-			span Years
-			br
 			#year-btn-wrapper
-				div(class="btn-group btn-group-vertical" data-toggle="buttons")
+				div(class="btn-group btn-group-vertical year-group" data-toggle="buttons")
 					label(class="btn btn-primary active")
 						<input type="checkbox" id="year-all">ALL
 					label(class="btn btn-primary")
