@@ -81,7 +81,7 @@ var Visualization = function() {
 		args['BUSSINESSUNIT'] = this.businessUnits;
 		args['CUSTOMER'] = [];
 		var chartData = this.getData(args);
-		Log('args: ' +  chartData);
+		console.log(chartData);
 		this.showPieChart(chartData['PIECHART']);
 		this.showBarChart(chartData['BARCHART']);
 	},

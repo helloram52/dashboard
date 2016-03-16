@@ -46,7 +46,7 @@ $(document).ready(function() {
 		// Initialize chart visualization
 		chartVisualization = new Visualization();
 		chartVisualization.init(jsonData, '#canvas-div');
-		gatherMonthYearsDataAndUpdateVisualization();
+		//gatherMonthYearsDataAndUpdateVisualization();
 	});
 
 	$('.btn-group .btn').on('click', function() {
