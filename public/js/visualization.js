@@ -52,20 +52,20 @@ var Visualization = function() {
 
 	},
 
-	this.UpdateView = function() {
+	this.UpdateView = function(yearObject, monthObject) {
 
 	},
 
-	//get data for pieChart
+	/*
+	 * Parses given input json to fetch data that .
+	 * pieChartDataArray=[
+	 *	{label: <busineessUnit>, revenue: <revenue>},
+	 *	{label: <busineessUnit>, revenue: <revenue>}
+	 * ];
+	 */
 	this.getPieChartData = function(JSONdata) {
 		var pieChartDataArray = [], i = 0;
-		/* 
-			pieChartDataArray=[
-				{label: <busineessUnit>, revenue: <revenue>},
-				{label: <busineessUnit>, revenue: <revenue>}
-			  ];
-		*/
-		
+
 		for(var busUnit in JSONdata){
 			var revenue = 0;
 			for(var year in JSONdata[busUnit]){

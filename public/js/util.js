@@ -11,3 +11,12 @@ function getSortedKeys(object) {
 
 	return keys.sort();
 }
+
+// Returns index if the value is found in the given array. -1 otherwise.
+function InList(arr, value) {
+	for(var i=0;i<arr.length;i++) {
+		if(arr[i] == value)
+			return i;
+	}
+	return -1;
+}

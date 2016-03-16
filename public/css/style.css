@@ -52,9 +52,11 @@ path {
 	background-color : green
 }
 #year-wrapper {
+/*
 	border-right-width: 1px;
 	border-right-style: solid;
 	border-right-color: black;
+*/
 	height: 300px;
 	width: 120px;
 	float: left;
