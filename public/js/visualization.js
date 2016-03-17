@@ -114,10 +114,14 @@ var Visualization = function() {
 		else if(fromChartType == 'PIE') {
 			// If no business units are selected, default to the
 			// units from json. Otherwise, use the current selections.
-			if(args['BUSINESSUNIT'].length == 0)
+			if(args['BUSINESSUNIT'].length == 0) {
+				Log('business unit length is zero.. pulling data from json');
 				this.setBusinessUnitsFromJSON();
-			else
+			}
+			else {
 				this.businessUnits = args['BUSINESSUNIT'];
+				Log('using bu from pie:' + this.businessUnits);
+			}
 
 			args['YEAR'] = this.years;
 			args['MONTH'] = this.months;
@@ -235,7 +239,7 @@ var Visualization = function() {
 		var fields = ['BUSINESSUNIT', 'YEAR', 'MONTH', 'CUSTOMER'];
 		var mandatoryFields = ['BUSINESSUNIT', 'YEAR', 'MONTH'];
 
-		if(!requireFields(args, fields, mandatoryFields)){
+		if(!requireFields(args, fields, mandatoryFields)) {
 			console.log("Visualization.js: getData():-Expected argument missing!");
 			return {};
 		}
