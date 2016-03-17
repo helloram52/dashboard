@@ -87,7 +87,7 @@ function requireFields(args, fields, mandatoryFields){
 	return true;
 }
 
-function convertJSONtoArray(JSONdata) {
+function convertDataForBarChart(JSONdata) {
 
 	//input format
 	/*
@@ -98,11 +98,27 @@ function convertJSONtoArray(JSONdata) {
 		
 		]	
 	*/
-	var array=['customers'], arrayIndex=array.length;
+	//output format
+	/*
+		JSONdata = [
+		
+		{'label', <customer>, 'data', <revenue>},
+		{'label', <customer>, 'data', <revenue>},
+		
+		]	
+	*/
+
+	var dataArray = ['customers'], index1 = dataArray.length;
+	var labelArray = ['customers'], index2 = labelArray.length;
 	
 	for(var i=0; i<JSONdata.length; i++) {
-		array[arrayIndex++] = JSONdata[i]['data'];
+		dataArray[index1++] = JSONdata[i]['data'];
+		labelArray[index2++] = JSONdata[i]['label'];
+		//console.log(JSONdata[i]['label']+" "+JSONdata[i]['data']);
 	}
 
-	return array;
+	return {
+		'dataArray' : dataArray,
+		'labelArray': labelArray 
+	};
 }

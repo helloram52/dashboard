@@ -698,7 +698,10 @@ var Visualization = function() {
 	},
 
 	this.drawBarChart = function(dataset, division) {
-		var columnData = convertJSONtoArray(dataset);
+
+		var JSONdata = convertDataForBarChart(dataset);
+		var yAxisData = JSONdata['dataArray'];
+		var labelData = JSONdata['labelArray'];
 
 		console.log("drawing bar chart");
 		
@@ -706,7 +709,7 @@ var Visualization = function() {
 		    bindto: division,
 		    data: {
 		      columns: [
-		      	columnData
+		      	yAxisData
 		      ],
 		      axes: {
 		        customers : 'y'
@@ -740,7 +743,6 @@ var Visualization = function() {
 		  //for (var key in value)
 		  	//console.log(key+":"+key.value);
 		  	d3.select('.c3-event-rect-'+index).style("fill", "white");
-		  	console.log("index="+index+"value="+columnData[index]);
 		});
 
 	},
