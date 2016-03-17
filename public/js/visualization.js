@@ -61,13 +61,19 @@ var Visualization = function() {
 			$('#bar-div').html("");
 			this.drawBarChart(barChartData, '#bar-div');
 		}
+		else {
+			Log('no data for bar chart');
+		}
 	},
 
 	this.showPieChart = function(pieChartData) {
 		if(pieChartData != undefined && pieChartData.length != 0) {
-			$('#pie-div').html("");
+			$('#pie-div').html('');
 			Log('drawing pie chart');
 			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 150, 5, 0);
+		}
+		else {
+			Log('no data to draw pie chart');
 		}
 	},
 
@@ -78,12 +84,13 @@ var Visualization = function() {
 		if(fromChartType == 'REFRESH') {
 			this.years = args['YEAR'];
 			this.months = args['MONTH'];
+			this.setBusinessUnitsFromJSON();
 
 			args['BUSINESSUNIT'] = this.businessUnits;
 			args['CUSTOMER'] = [];
 
 			var chartData = this.getData(args);
-
+			Log('initialising pie & bar charts');
 			this.showPieChart(chartData['PIECHART']);
 			this.showBarChart(chartData['BARCHART']);
 		}
@@ -92,14 +99,19 @@ var Visualization = function() {
 		// propagate the selections made.
 		// Note: This should be called with BUSINESSUNITS args
 		else if(fromChartType == 'PIE') {
-			// Save this for making cluster chart later
-			this.businessUnits = args['BUSINESSUNITS'];
+			// If no business units are selected, default to the
+			// units from json. Otherwise, use the current selections.
+			if(args['BUSINESSUNIT'].length == 0)
+				this.setBusinessUnitsFromJSON();
+			else
+				this.businessUnits = args['BUSINESSUNIT'];
 
 			args['YEAR'] = this.years;
 			args['MONTH'] = this.months;
 			args['CUSTOMER'] = [];
 
 			var chartData = this.getData(args);
+			Log('updating bar charts')
 			this.showBarChart(chartData['BARCHART']);
 		}
 		// Case 3: A selection is made in Bar chart
@@ -513,6 +525,7 @@ var Visualization = function() {
 			}
 			return num.toString();
 		}
+
 		//handle mouseOut event
 		var synchronizedMouseOut = function(d) {
 			var arc = d3.select(this);
@@ -634,7 +647,6 @@ var Visualization = function() {
 					parent.updateView({
 						'BUSINESSUNIT' : Object.keys(parent.chartSelections.PIECHART),
 					}, 'PIE');
-
 				}
 			})
 			//.on("mousemove", synchronizedMouseMove)
