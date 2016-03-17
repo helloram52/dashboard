@@ -86,3 +86,23 @@ function requireFields(args, fields, mandatoryFields){
 	}
 	return true;
 }
+
+function convertJSONtoArray(JSONdata) {
+
+	//input format
+	/*
+		JSONdata = [
+		
+		{'label', <customer>, 'data', <revenue>},
+		{'label', <customer>, 'data', <revenue>},
+		
+		]	
+	*/
+	var array=['customers'], arrayIndex=array.length;
+	
+	for(var i=0; i<JSONdata.length; i++) {
+		array[arrayIndex++] = JSONdata[i]['data'];
+	}
+
+	return array;
+}

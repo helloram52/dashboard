@@ -678,17 +678,62 @@ var Visualization = function() {
 		
 	},
 
+	this.drawBarChart = function(dataset, division) {
 
+		var columnData = convertJSONtoArray(dataset);
+
+		console.log("drawing bar chart");
+		
+		c3.generate({
+		    bindto: division,
+		    data: {
+		      columns: [
+		      	columnData
+		      ],
+		      axes: {
+		        customers : 'y'
+		      },
+		      types: {
+		        customers : 'bar' // ADD
+		      }
+		    },
+		    axis: {
+		      y: {
+		        label: {
+		          text: 'Revenue',
+		          position: 'outer-middle'
+		        }
+		      },
+		      y2: {
+		        show: false,
+		        label: {
+		          text: 'Y2 Label',
+		          position: 'outer-middle'
+		        }
+		      }
+		    }
+		});
+
+		 //c3-event-rect c3-event-rect-12
+
+		d3.selectAll('.c3-event-rect')
+		.on('click', function(value,index){
+		  //alert('Tick index: ' + index + ' value: ' + value );
+		  //for (var key in value)
+		  	//console.log(key+":"+key.value);
+		  	d3.select('.c3-event-rect-'+index).style("fill", "white");
+		  	console.log("index="+index+"value="+columnData[index]);
+		});
+
+	}
+
+/*
 	this.drawBarChart = function(dataset, division){
 		
 		var margin = {top: 20, right: 20, bottom: 30, left: 40},
 		width = 800 - margin.left - margin.right,
 		height = 300 - margin.top - margin.bottom;
 		
-		/*var margin = {top: 20, right: 20, bottom: 30, left: 40},
-		width = 960 - margin.left - margin.right,
-		height = 500 - margin.top - margin.bottom;
-		*/
 		var x = d3.scale.ordinal()
 		.rangeRoundBands([0, width], .1);
 
@@ -714,9 +759,9 @@ var Visualization = function() {
 		x.domain(dataset.map(function(d) { return d.label; }));
 		y.domain([0, d3.max(dataset, function(d) { return d.data; })]);
 
-		/*svg.append("g")
+		svg.append("g")
 				.attr("class", "x axis")
-				.attr("transform", "translate(0," + height + ")");*/
+				.attr("transform", "translate(0," + height + ")");
 				//.call(xAxis);
 
 		svg.append("g")
@@ -746,19 +791,18 @@ var Visualization = function() {
 				.attr("height", function(d) { return height - y(d.data); });
 
 	
-	function mouseOver() {
+	function mouseOver(d) {
 		
-		/*var tableMessage = "<table border='2' align='center'><tr><td >Customer</td><td bgcolor='green' align='center'>"+ d.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data, 1) +"</td></tr></table>";
+		var tableMessage = "<table border='2' align='center'><tr><td >Customer</td><td bgcolor='green' align='center'>"+ d.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data, 1) +"</td></tr></table>";
 		//display percent value in tool tip for the seleceted bar
 		console.log(d.data);
 		tipBar.html(function(b) {
 			return tableMessage;
-		});*/
-		tipBar.html("working");
+		});
 		tipBar.show();
 	}
 
-	}
+	}*/
 
 	this.destroy = function() {
 
