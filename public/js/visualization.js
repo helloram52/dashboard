@@ -648,14 +648,11 @@ var Visualization = function() {
 		var y = d3.scale.linear()
 		.range([height, 0]);
 
-		var xAxis = d3.svg.axis()
-		.scale(x)
-		.orient("bottom");
-
 		var yAxis = d3.svg.axis()
 		.scale(y)
 		.orient("left")
-		//.ticks(10, "");
+		.ticks(6);
+
 		var tipBar = d3.tip()
 				.attr('class', 'd3-tip');
 
@@ -670,10 +667,10 @@ var Visualization = function() {
 		x.domain(dataset.map(function(d) { return d.label; }));
 		y.domain([0, d3.max(dataset, function(d) { return d.data; })]);
 
-		svg.append("g")
+		/*svg.append("g")
 				.attr("class", "x axis")
-				.attr("transform", "translate(0," + height + ")")
-				.call(xAxis);
+				.attr("transform", "translate(0," + height + ")");*/
+				//.call(xAxis);
 
 		svg.append("g")
 				.attr("class", "y axis")
@@ -683,20 +680,7 @@ var Visualization = function() {
 				.attr("y", 6)
 				.attr("dy", ".71em")
 				.style("text-anchor", "end")
-				.text("Revenue");
-
-		tipBar.html('working');
-		function mouseOver(d) {
-			
-			var tableMessage = "<table border='2' align='center'><tr><td >Customer</td><td bgcolor='green' align='center'>"+ d.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data, 1) +"</td></tr></table>";
-			//display percent value in tool tip for the seleceted bar
-			console.log(d.data);
-			tipBar.html(function(b) {
-				return tableMessage;
-			});
-
-			tipBar.show();
-		}	
+				.text("Revenue");	
 
 		console.log("before last section");
 
@@ -706,11 +690,27 @@ var Visualization = function() {
 				.attr("class", "bar")
 				.attr("x", function(d) { return x(d.label); })
 				.attr("width", x.rangeBand())
-				.on('mouseover', mouseOver)
+				.on('mouseover', function(d){
+
+
+				})
 				.on('mouseout',tipBar.hide)
-				.attr("y", function(d) { return y(d.data); })
+				.attr("y", function(d) { console.log(y(1000)); return y(d.data); })
 				.attr("height", function(d) { return height - y(d.data); });
+
 	
+	function mouseOver() {
+		
+		/*var tableMessage = "<table border='2' align='center'><tr><td >Customer</td><td bgcolor='green' align='center'>"+ d.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data, 1) +"</td></tr></table>";
+		//display percent value in tool tip for the seleceted bar
+		console.log(d.data);
+		tipBar.html(function(b) {
+			return tableMessage;
+		});*/
+		tipBar.html("working");
+		tipBar.show();
+	}
+
 	}
 
 	this.destroy = function() {
