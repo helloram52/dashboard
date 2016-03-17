@@ -621,7 +621,6 @@ var Visualization = function() {
 					parent.updateView({
 						'BUSINESSUNIT' : Object.keys(parent.chartSelections.PIECHART),
 					}, 'PIE');
-					Log('sending updateview for unit(s) ' + [ Object.keys(parent.chartSelections.PIECHART) ] );
 				}
 				// If it's already selected, replace maroon with it's old color
 				// and remove it from the stored list.
@@ -631,6 +630,11 @@ var Visualization = function() {
 
 					delete parent.chartSelections.PIECHART[data.data.label];
 					selectedArc.attr('selected', '0');
+
+					parent.updateView({
+						'BUSINESSUNIT' : Object.keys(parent.chartSelections.PIECHART),
+					}, 'PIE');
+
 				}
 			})
 			//.on("mousemove", synchronizedMouseMove)

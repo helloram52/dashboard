@@ -174,6 +174,8 @@ $(document).ready(function() {
 	};
 });
 
+// Todo: Cache the year and month selections so that we don't call view update
+// on the last selected 
 var monthYearCache = {};
 function gatherMonthYearsDataAndUpdateVisualization() {
 	var selectedMonths = getSelectedMonths();
