@@ -207,3 +207,6 @@ svg {
 text {
   font: 10px sans-serif;
 }
+.barselected {
+	color: #fff;
+}

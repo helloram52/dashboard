@@ -738,13 +738,10 @@ var Visualization = function() {
 		 //c3-event-rect c3-event-rect-12
 
 		d3.selectAll('.c3-event-rect')
-		.on('click', function(value,index){
-		  //alert('Tick index: ' + index + ' value: ' + value );
-		  //for (var key in value)
-		  	//console.log(key+":"+key.value);
-		  	d3.select('.c3-event-rect-'+index).style("fill", "white");
-		});
-
+			.on('click', function(value, index) {
+				d3.select('.c3-event-rect-' + index).style('fill', 'yellow').style('opacity', '1');
+				console.log("index = " + index + " value = " + columnData[index]);
+			});
 	},
 
 /*
