@@ -460,8 +460,8 @@ var Visualization = function() {
 					+ " <br /><strong> Revenue:</strong> <span style='color:red'>"
 					+ formatCurrency(d.data.data, 1)
 					+ "</span>";
+
 				return tableMessage;
-						//<br> <strong>"+ Revenue+":</strong> <span style='color:red'>" + d.data.dat + "%</span>";
 			})
 			tip.show();
 		};
@@ -631,10 +631,11 @@ var Visualization = function() {
 		
 	},
 
+
 	this.drawBarChart = function(dataset, division){
 		
 		var margin = {top: 20, right: 20, bottom: 30, left: 40},
-		width = 1000 - margin.left - margin.right,
+		width = 800 - margin.left - margin.right,
 		height = 300 - margin.top - margin.bottom;
 		
 		/*var margin = {top: 20, right: 20, bottom: 30, left: 40},
@@ -654,40 +655,62 @@ var Visualization = function() {
 		var yAxis = d3.svg.axis()
 		.scale(y)
 		.orient("left")
-		.ticks(10, "");
+		//.ticks(10, "");
+		var tipBar = d3.tip()
+				.attr('class', 'd3-tip');
 
 		var svg = d3.select(division).append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-		.append("g")
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		svg.call(tipBar);
 
 		x.domain(dataset.map(function(d) { return d.label; }));
 		y.domain([0, d3.max(dataset, function(d) { return d.data; })]);
 
 		svg.append("g")
-		.attr("class", "x axis")
-		.attr("transform", "translate(0," + height + ")")
-		.call(xAxis);
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + height + ")")
+				.call(xAxis);
 
 		svg.append("g")
-		.attr("class", "y axis")
-		.call(yAxis)
-		.append("text")
-		.attr("transform", "rotate(-90)")
-		.attr("y", 6)
-		.attr("dy", ".71em")
-		.style("text-anchor", "end")
-		.text("Revenue");
-		svg.selectAll(".bar")
-		.data(dataset)
-		.enter().append("rect")
-		.attr("class", "bar")
-		.attr("x", function(d) { return x(d.label); })
-		.attr("width", x.rangeBand())
-		.attr("y", function(d) { return y(d.data); })
-		.attr("height", function(d) { return height - y(d.data); });
+				.attr("class", "y axis")
+				.call(yAxis)
+				.append("text")
+				.attr("transform", "rotate(-90)")
+				.attr("y", 6)
+				.attr("dy", ".71em")
+				.style("text-anchor", "end")
+				.text("Revenue");
 
+		tipBar.html('working');
+		function mouseOver(d) {
+			
+			var tableMessage = "<table border='2' align='center'><tr><td >Customer</td><td bgcolor='green' align='center'>"+ d.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data, 1) +"</td></tr></table>";
+			//display percent value in tool tip for the seleceted bar
+			console.log(d.data);
+			tipBar.html(function(b) {
+				return tableMessage;
+			});
+
+			tipBar.show();
+		}	
+
+		console.log("before last section");
+
+		svg.selectAll(".bar")
+				.data(dataset)
+				.enter().append("rect")
+				.attr("class", "bar")
+				.attr("x", function(d) { return x(d.label); })
+				.attr("width", x.rangeBand())
+				.on('mouseover', mouseOver)
+				.on('mouseout',tipBar.hide)
+				.attr("y", function(d) { return y(d.data); })
+				.attr("height", function(d) { return height - y(d.data); });
+	
 	}
 
 	this.destroy = function() {

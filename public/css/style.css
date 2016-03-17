@@ -186,24 +186,20 @@ svg {
 }
 
 .bar {
-	fill: steelblue;
+  fill: steelblue;
 }
 
 .bar:hover {
-	fill: brown;
+  fill: orangered ;
 }
 
-.axis {
-	font: 10px sans-serif;
+.x.axis path {
+  display: none;
 }
 
 .axis path,
 .axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-}
-
-.x.axis path {
-	display: none;
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
 }
