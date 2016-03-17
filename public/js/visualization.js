@@ -39,7 +39,7 @@ var Visualization = function() {
 		this.chartSelections = {
 			'PIECHART' : {},
 			'BARCHART' : {},
-			'CLUSTERCHART' : {}
+			'BUBBLECHART' : {}
 		};
 	},
 
@@ -55,10 +55,20 @@ var Visualization = function() {
 		//initialise business Units for later use
 		this.setBusinessUnitsFromJSON();
 	},
-	
+
+	this.showBubbleChart =function(bubbleChartData) {
+		if(bubbleChartData != undefined && bubbleChartData.length != 0){
+			$('#bubble-div').html('');
+			this.drawBubbleChart(bubbleChartData, '#bubble-div');
+		}
+		else {
+			Log('no data for bubble chart');
+		}
+	},
+
 	this.showBarChart =function(barChartData) {
 		if(barChartData != undefined && barChartData.length != 0){
-			$('#bar-div').html("");
+			$('#bar-div').html('');
 			this.drawBarChart(barChartData, '#bar-div');
 		}
 		else {
@@ -84,15 +94,18 @@ var Visualization = function() {
 		if(fromChartType == 'REFRESH') {
 			this.years = args['YEAR'];
 			this.months = args['MONTH'];
+			// reset business units to include ALL
 			this.setBusinessUnitsFromJSON();
 
 			args['BUSINESSUNIT'] = this.businessUnits;
 			args['CUSTOMER'] = [];
 
 			var chartData = this.getData(args);
-			Log('initialising pie & bar charts');
+			Log('initialising pie, bar & bubble charts');
+
 			this.showPieChart(chartData['PIECHART']);
 			this.showBarChart(chartData['BARCHART']);
+			this.showBubbleChart(chartData['BUBBLECHART']);
 		}
 		// Case 2: A selection is made in Pie chart
 		// and the bar chart and it's successors charts should
@@ -111,14 +124,20 @@ var Visualization = function() {
 			args['CUSTOMER'] = [];
 
 			var chartData = this.getData(args);
-			Log('updating bar charts')
+			Log('updating bar charts');
 			this.showBarChart(chartData['BARCHART']);
+			this.showBubbleChart(chartData['BUBBLECHART']);
 		}
 		// Case 3: A selection is made in Bar chart
-		// and the cluster chart should propagate the selections made.
+		// and the bubble chart should propagate the selections made.
 		// Note: This should be called with CUSTOMER args
-		else {
+		else if(fromChartType == 'BAR') {
+			args['YEAR'] = this.years;
+			args['MONTH'] = this.months;
 
+			var chartData = this.getData(args);
+			Log('updating bar charts');
+			this.showBubbleChart(chartData['BARCHART']);
 		}
 	},
 
@@ -128,11 +147,11 @@ var Visualization = function() {
 		var inputData = this.jsonObject['ALLDATA'];
 		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByCountry = 0;
 		var chartData = {};
-		var pieChartDataArray = [], barChartDataArray = [], clusterChartDataArray = [];
+		var pieChartDataArray = [], barChartDataArray = [], bubbleChartDataArray = [];
 		var customerJSON = {};
 		var countryJSON = {};
 
-		//iterate the inputData for all customers and compose output for pieChart, Barchart and clusterChart
+		//iterate the inputData for all customers and compose output for pieChart, Barchart and bubbleChart
 		for(var busUnit in inputData) {
 			var revenueByBusinessUnit = 0;
 			//for each year accumulate the revenue for charts 
@@ -154,7 +173,7 @@ var Visualization = function() {
 						 else {
 							customerJSON[customer] = revenueByCustomer;
 						}
-						//gather data for cluster chart
+						//gather data for bubble chart
 						for(var country in customers[customer]){
 
 							if(country != 'TOTAL'){
@@ -169,7 +188,7 @@ var Visualization = function() {
 							}
 						}
 					}
-				}	
+				}
 			}
 			//populate data for pie chart
 			var pieChartData = {};
@@ -185,18 +204,18 @@ var Visualization = function() {
 			barChartDataArray[customerIndex++] = barChartData;
 		}
 
-		//populate data for cluster chart
+		//populate data for bubble chart
 		countryIndex =0;
 		for(country in countryJSON){
-			var clusterChartData = {};
-			clusterChartData['label'] = country;
-			clusterChartData['data'] = countryJSON[country];
-			clusterChartDataArray[countryIndex++] = clusterChartData;
+			var bubbleChartData = {};
+			bubbleChartData['label'] = country;
+			bubbleChartData['data'] = countryJSON[country];
+			bubbleChartDataArray[countryIndex++] = bubbleChartData;
 		}
 
 		chartData['PIECHART'] = pieChartDataArray;
 		chartData['BARCHART'] = barChartDataArray;
-		chartData['CLUSTERCHART'] = clusterChartDataArray;
+		chartData['BUBBLECHART'] = bubbleChartDataArray;
 
 		return chartData;
 	},
@@ -206,7 +225,7 @@ var Visualization = function() {
 	 * ChartData={
 	 *	'BARCHART' : {label: <customer>, revenue: <revenue>},
 	 *	'PIECHART' : {label: <BusinessUnit>, revenue: <revenue>},
-	 *	'CLUSTERCHART' : {label: <country>, revenue: <revenue>}
+	 *	'BUBBLECHART' : {label: <country>, revenue: <revenue>}
 	 * };
 	 */
 	this.getData = function(args) {
@@ -228,13 +247,13 @@ var Visualization = function() {
 		var selectedCustomers = args['CUSTOMER'];
 		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByCountry = 0;
 		var chartData = {};
-		var pieChartDataArray = [], barChartDataArray = [], clusterChartDataArray = [];
+		var pieChartDataArray = [], barChartDataArray = [], bubbleChartDataArray = [];
 		var customerJSON = {};
 		var countryJSON = {};
 
 		//check whether arguments have valid data
 		if(args['CUSTOMER'].length == 0) {
-			//iterate the inputData for all customers and compose output for pieChart, Barchart and clusterChart
+			//iterate the inputData for all customers and compose output for pieChart, Barchart and bubbleChart
 			for(var busUnit in selectedBusinessUnits) {
 				//set the busUnit as value, rather than index. (to improve readablity)
 				var selectedBusUnit = selectedBusinessUnits[busUnit];
@@ -268,7 +287,7 @@ var Visualization = function() {
 										 else {
 											customerJSON[customer] = revenueByCustomer;
 										}
-										//gather data for cluster chart
+										//gather data for bubble chart
 										for(var country in customers[customer]){
 
 											if(country != 'TOTAL'){
@@ -296,7 +315,7 @@ var Visualization = function() {
 			}
 		}
 		else {
-			//iterate the inputData for selected customers and compose output for pieChart, Barchart and clusterChart
+			//iterate the inputData for selected customers and compose output for pieChart, Barchart and bubbleChart
 			for(var busUnit in selectedBusinessUnits) {
 				var revenueByBusinessUnit = 0;
 				//set the busUnit as value, rather than index. (to improve readablity)
@@ -332,7 +351,7 @@ var Visualization = function() {
 										 else {
 											customerJSON[customer] = revenueByCustomer;
 										}
-										//gather data for cluster chart
+										//gather data for bubble chart
 										for(var country in customers[customer]){
 
 											if(country != 'TOTAL'){
@@ -369,18 +388,18 @@ var Visualization = function() {
 			barChartDataArray[customerIndex++] = barChartData;
 		}
 
-		//populate data for cluster chart
+		//populate data for bubble chart
 		countryIndex =0;
 		for(country in countryJSON){
-			var clusterChartData = {};
-			clusterChartData['label'] = country;
-			clusterChartData['data'] = countryJSON[country];
-			clusterChartDataArray[countryIndex++] = clusterChartData;
+			var bubbleChartData = {};
+			bubbleChartData['label'] = country;
+			bubbleChartData['data'] = countryJSON[country];
+			bubbleChartDataArray[countryIndex++] = bubbleChartData;
 		}
 
 		chartData['PIECHART'] = pieChartDataArray;
 		chartData['BARCHART'] = barChartDataArray;
-		chartData['CLUSTERCHART'] = clusterChartDataArray;
+		chartData['BUBBLECHART'] = bubbleChartDataArray;
 
 		return chartData;
 	},
@@ -679,7 +698,6 @@ var Visualization = function() {
 	},
 
 	this.drawBarChart = function(dataset, division) {
-
 		var columnData = convertJSONtoArray(dataset);
 
 		console.log("drawing bar chart");
@@ -725,11 +743,10 @@ var Visualization = function() {
 		  	console.log("index="+index+"value="+columnData[index]);
 		});
 
-	}
+	},
 
 /*
-	this.drawBarChart = function(dataset, division){
-		
+	this.drawBarChart = function(dataset, division){		
 		var margin = {top: 20, right: 20, bottom: 30, left: 40},
 		width = 800 - margin.left - margin.right,
 		height = 300 - margin.top - margin.bottom;
@@ -774,8 +791,6 @@ var Visualization = function() {
 				.style("text-anchor", "end")
 				.text("Revenue");	
 
-		console.log("before last section");
-
 		svg.selectAll(".bar")
 				.data(dataset)
 				.enter().append("rect")
@@ -787,10 +802,9 @@ var Visualization = function() {
 
 				})
 				.on('mouseout',tipBar.hide)
-				.attr("y", function(d) { console.log(y(1000)); return y(d.data); })
+				.attr("y", function(d) { return y(d.data); })
 				.attr("height", function(d) { return height - y(d.data); });
 
-	
 	function mouseOver(d) {
 		
 		var tableMessage = "<table border='2' align='center'><tr><td >Customer</td><td bgcolor='green' align='center'>"+ d.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data, 1) +"</td></tr></table>";
@@ -803,7 +817,9 @@ var Visualization = function() {
 	}
 
 	}*/
+	this.drawBubbleChart = function() {
 
+	},
 	this.destroy = function() {
 
 	}
