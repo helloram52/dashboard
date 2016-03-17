@@ -224,47 +224,61 @@ var Visualization = function() {
 		if(args['CUSTOMER'].length == 0) {
 			//iterate the inputData for all customers and compose output for pieChart, Barchart and clusterChart
 			for(var busUnit in selectedBusinessUnits) {
+				//set the busUnit as value, rather than index. (to improve readablity)
+				var selectedBusUnit = selectedBusinessUnits[busUnit];
 				var revenueByBusinessUnit = 0;
 				//for each year accumulate the revenue for charts 
 				for(var year in selectedYears) {
-					//for each month accumulate the revenue for charts
-					for(var month in selectedMonths) {
-						revenueByBusinessUnit += inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]]['TOTAL'];
-						var customers = inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]];
-						for(var customer in customers){
-							//gather data for bar chart
-							if(customer != 'TOTAL'){
-								
-								revenueByCustomer = customers[customer]['TOTAL'];
-								
-								if(customerJSON.hasOwnProperty(customer)){
-									revenueByCustomer += customerJSON[customer];
-									customerJSON[customer] = revenueByCustomer;
-								}
-								 else {
-									customerJSON[customer] = revenueByCustomer;
-								}
-								//gather data for cluster chart
-								for(var country in customers[customer]){
+					//set the year as value, rather than index. (to improve readablity)
+					var selectedYear = selectedYears[year];
+					//check whether year property is present for this object
+					if(inputData[selectedBusUnit].hasOwnProperty(selectedYear)) {
+						//for each month accumulate the revenue for charts
+						for(var month in selectedMonths) {
+							//set the year as value, rather than index. (to improve readablity)
+							var selectedMonth = selectedMonths[month];
+							//check whether month property is present for this object
+							if(inputData[selectedBusUnit][selectedYear].hasOwnProperty(selectedMonth)) {
 
-									if(country != 'TOTAL'){
-										revenueByCountry = customers[customer][country];
-										if(countryJSON.hasOwnProperty(country)){
-											revenueByCountry += countryJSON[country];
-											countryJSON[country] = revenueByCountry;
+								revenueByBusinessUnit += inputData[selectedBusUnit][selectedYear][selectedMonth]['TOTAL'];
+								var customers = inputData[selectedBusUnit][selectedYear][selectedMonth];
+								
+								for(var customer in customers){
+									//gather data for bar chart
+									if(customer != 'TOTAL'){
+										
+										revenueByCustomer = customers[customer]['TOTAL'];
+										
+										if(customerJSON.hasOwnProperty(customer)){
+											revenueByCustomer += customerJSON[customer];
+											customerJSON[customer] = revenueByCustomer;
 										}
-										else{
-											countryJSON[country] = revenueByCountry;	
+										 else {
+											customerJSON[customer] = revenueByCustomer;
+										}
+										//gather data for cluster chart
+										for(var country in customers[customer]){
+
+											if(country != 'TOTAL'){
+												revenueByCountry = customers[customer][country];
+												if(countryJSON.hasOwnProperty(country)){
+													revenueByCountry += countryJSON[country];
+													countryJSON[country] = revenueByCountry;
+												}
+												else{
+													countryJSON[country] = revenueByCountry;	
+												}
+											}
 										}
 									}
 								}
 							}
-						}
-					}	
+						}	
+					}
 				}
 				//populate data for pie chart
 				var pieChartData = {};
-				pieChartData['label'] = selectedBusinessUnits[busUnit];
+				pieChartData['label'] = selectedBusUnit;
 				pieChartData['data'] = revenueByBusinessUnit;
 				pieChartDataArray[busUnitIndex++] = pieChartData;
 			}
@@ -273,36 +287,53 @@ var Visualization = function() {
 			//iterate the inputData for selected customers and compose output for pieChart, Barchart and clusterChart
 			for(var busUnit in selectedBusinessUnits) {
 				var revenueByBusinessUnit = 0;
+				//set the busUnit as value, rather than index. (to improve readablity)
+				var selectedBusUnit = selectedBusinessUnits[busUnit];
 				//for each year accumulate the revenue for charts 
 				for(var year in selectedYears) {
-					//for each month accumulate the revenue for charts 
-					for(var month in selectedMonths) {
-						revenueByBusinessUnit += inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]]['TOTAL'];
-						var customers = inputData[selectedBusinessUnits[busUnit]][selectedYears[year]][selectedMonths[month]];
-						for(var customerPos in selectedCustomers){
-							var customer = selectedCustomers[customerPos];
-							//gather data for bar chart
-								
-							revenueByCustomer = customers[customer]['TOTAL'];
-							
-							if(customerJSON.hasOwnProperty(customer)){
-								revenueByCustomer += customerJSON[customer];
-								customerJSON[customer] = revenueByCustomer;
-							}
-							 else {
-								customerJSON[customer] = revenueByCustomer;
-							}
-							//gather data for cluster chart
-							for(var country in customers[customer]){
+					//set the year as value, rather than index. (to improve readablity)
+					var selectedYear = selectedYears[year];
+					//check whether year property is present for this object
+					if(inputData[selectedBusUnit].hasOwnProperty(selectedYear)) {					
+						//for each month accumulate the revenue for charts 
+						for(var month in selectedMonths) {
+							//set the year as value, rather than index. (to improve readablity)
+							selectedMonth = selectedMonths[month];
+							//check whether month property is present for this object
+							if(inputData[selectedBusUnit][selectedYear].hasOwnProperty(selectedMonth)) {
+								revenueByBusinessUnit += inputData[selectedBusUnit][selectedYear][selectedMonth]['TOTAL'];
+								var customers = inputData[selectedBusUnit][selectedYear][selectedMonth];
 
-								if(country != 'TOTAL'){
-									revenueByCountry = customers[customer][country];
-									if(countryJSON.hasOwnProperty(country)){
-										revenueByCountry += countryJSON[country];
-										countryJSON[country] = revenueByCountry;
-									}
-									else{
-										countryJSON[country] = revenueByCountry;	
+								for(var customerPos in selectedCustomers){
+									
+									var customer = selectedCustomers[customerPos];
+									//gather data for bar chart
+									//check whether customer property is present for this object
+									if(customers.hasOwnProperty(customer)) {
+
+										revenueByCustomer = customers[customer]['TOTAL'];
+										
+										if(customerJSON.hasOwnProperty(customer)){
+											revenueByCustomer += customerJSON[customer];
+											customerJSON[customer] = revenueByCustomer;
+										}
+										 else {
+											customerJSON[customer] = revenueByCustomer;
+										}
+										//gather data for cluster chart
+										for(var country in customers[customer]){
+
+											if(country != 'TOTAL'){
+												revenueByCountry = customers[customer][country];
+												if(countryJSON.hasOwnProperty(country)){
+													revenueByCountry += countryJSON[country];
+													countryJSON[country] = revenueByCountry;
+												}
+												else{
+													countryJSON[country] = revenueByCountry;	
+												}
+											}
+										}
 									}
 								}
 							}
@@ -311,7 +342,7 @@ var Visualization = function() {
 				}
 				//populate data for pie chart
 				var pieChartData = {};
-				pieChartData['label'] = selectedBusinessUnits[busUnit];
+				pieChartData['label'] = selectedBusUnit;
 				pieChartData['data'] = revenueByBusinessUnit;
 				pieChartDataArray[busUnitIndex++] = pieChartData;
 			}
@@ -588,7 +619,7 @@ var Visualization = function() {
 					parent.chartSelections.PIECHART[data.data.label] = '1';
 
 					parent.updateView({
-						'BUSINESSUNIT' : [ Object.keys(parent.chartSelections.PIECHART) ],
+						'BUSINESSUNIT' : Object.keys(parent.chartSelections.PIECHART),
 					}, 'PIE');
 					Log('sending updateview for unit(s) ' + [ Object.keys(parent.chartSelections.PIECHART) ] );
 				}
