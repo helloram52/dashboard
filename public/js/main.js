@@ -38,21 +38,30 @@ var qtrIDToMonthsIDMap = {
 	]
 };
 
+// Keep track of the most recent year to reset.
+var mostRecentYear;
+
 $(document).ready(function() {
+	// Get the most recent year
+	// Note: this assumes that the year field is sorted in decreasing order
+	// and the second child in the year-group buttons is the most recent year.
+	mostRecentYear = $('.year-group .btn:nth-child(2)').first().text();
+
+	// Let's grab the json required for the visualization
 	$.get("/getGraphJSON", function(jsonData) {
+		// Hide the loading indicator
 		$('.loadingbtn').css('display', 'none');
-		// Set Years field using the json.
 
 		// Initialize chart visualization
 		chartVisualization = new Visualization();
 		chartVisualization.init(jsonData, '#canvas-div');
-		//gatherMonthYearsDataAndUpdateVisualization();
+		gatherMonthYearsDataAndUpdateVisualization();
 	});
 
 	$('.btn-group .btn').on('click', function() {
 		// Queuing up the update event as the bug in bootstrap
 		// doesn't toggle the button's active class as soon as
-		// the click happened.
+		// the click happens.
 		$(this).delay(100).queue(updateYearQtrMonthButtons);
 	});
 
@@ -106,31 +115,66 @@ $(document).ready(function() {
 		else if(self.parent().hasClass('year-group')) {
 			// If non-ALL QTR checkboxes are selected, uncheck 'ALL' checkbox
 			if (checkboxID.match(/all/) == null) {
-				Log('all year clicked');
-				var allCheckbox = self.parent().find(":first")
+				var allCheckbox = self.parent().find(":first");
 				if(allCheckbox.hasClass("active")) {
 					allCheckbox.removeClass("active");
 				}
 			}
-			// If ALL year is checked, check all years.
 			else {
-				Log('all year clicked');
-				self.parent().children().each(function(i) {
-					// Skip if this is the ALL checkbox
-					if($(this).is(checkbox))
-						return;
-					if(!$(this).hasClass("active") ) {
-						$(this).addClass("active");
-					}
-				});
+				// If it's ALL, modify the text to 'RESET' so that user can easily deselect
+				// years. Also set all years to active.
+				if(self.text() === 'ALL') {
+					self.parent().children().each(function(i) {
+						// Skip if this is the ALL checkbox
+						if($(this).is(checkbox))
+							return;
+						if(!$(this).hasClass("active") ) {
+							$(this).addClass("active");
+						}
+					});
+
+					// Note: This is a hacky manipulation to modify text of the button.
+					// Using .text('RESET') will get rid of the input checkbox which is bad.
+					var currentText = self.html();
+					currentText = currentText.replace(/ALL/, 'RESET');
+					self.html(currentText);
+				}
+				else {
+					// If it's RESET, let's set all children inactive
+					// except for the one that holds the most recent year.
+					// Also set the text to 'ALL'.
+					self.parent().children().each(function(index) {
+						var year = $(this);
+						// Skip if this is the ALL checkbox
+						if(year.is(checkbox))
+							return;
+
+						if(year.text() == mostRecentYear) {
+							if(!year.hasClass('active'))
+								year.addClass('active');
+						}
+						else {
+							if(year.hasClass('active'))
+								year.removeClass('active');
+						}
+					});
+
+					// Note: This is a hacky manipulation to modify text of the button.
+					// Using .text('ALL') will get rid of the input checkbox which is bad.
+					var currentText = self.html();
+					currentText = currentText.replace(/RESET/, 'ALL');
+					self.html(currentText);
+				}
 			}
 		}
+
 		// Let's update the view for every year/month update
 		gatherMonthYearsDataAndUpdateVisualization();
 		$(this).dequeue();
 	};
 });
 
+var monthYearCache = {};
 function gatherMonthYearsDataAndUpdateVisualization() {
 	var selectedMonths = getSelectedMonths();
 	var selectedYears = getSelectedYears();

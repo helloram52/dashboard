@@ -549,7 +549,7 @@ var Visualization = function() {
 			//.on("mousemove", synchronizedMouseMove)
 			.transition()
 			.ease("bounce")
-			.duration(200)
+			.duration(1000)
 			//.delay(function(d, i) { return i * 50; })
 			.attrTween("d", tweenPie);
 
