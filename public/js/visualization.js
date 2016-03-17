@@ -25,40 +25,35 @@
  * }
  */
 var Visualization = function() {
-	this.data = {};
 	this.canvasSelectorString = '';
-	this.businessUnits=[];
-	this.jsonObject={};
+	this.businessUnits = [];
+	this.jsonObject = {};
+
+	var parent = this;
 
 	this.init = function(jsonObject, canvasSelectorString) {
-		this.data = jsonObject;
 		this.canvasSelectorString = canvasSelectorString;
-		this.parseData();
-		this.jsonObject=jsonObject;
-		//initialise business Units for later use
-		this.storeBusinessUnits();
-		var currentYear = this.jsonObject['YEARS'][0];
+		this.jsonObject = jsonObject;
+		this.gatherData();
 
-		var result = this.getAllData(currentYear);
-		console.log(result);
-
-		this.showPieChart(result['PIECHART']);
-		this.showBarChart(result['BARCHART']);
-		//this.showClusterChart();
+		this.chartSelections = {
+			'PIECHART' : {},
+			'BARCHART' : {},
+			'CLUSTERCHART' : {}
+		};
 	},
 
-	this.storeBusinessUnits = function() {
-
+	this.setBusinessUnitsFromJSON = function() {
 		var inputData = this.jsonObject['ALLDATA'];
 		var index = 0;
 		for(var busUnit in inputData){
 			this.businessUnits[index++] = busUnit;
 		}
-	
 	},
 
-	this.parseData = function() {
-
+	this.gatherData = function() {
+		//initialise business Units for later use
+		this.setBusinessUnitsFromJSON();
 	},
 	
 	this.showBarChart =function(barChartData) {
@@ -72,20 +67,47 @@ var Visualization = function() {
 		if(pieChartData != undefined && pieChartData.length != 0) {
 			$('#pie-div').html("");
 			Log('drawing pie chart');
-			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 100, 5, 0);
+			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 150, 5, 0);
 		}
 	},
 
-	this.updateView = function(args) {
-		//case 1: month or year is updated:
+	this.updateView = function(args, fromChartType) {
+		//case 1: month or year is updated from the onChange event of year/month buttons:
 		//	a. refresh data for all the charts by calling getData()
 		//  b. redraw all charts
-		args['BUSSINESSUNIT'] = this.businessUnits;
-		args['CUSTOMER'] = [];
-		var chartData = this.getData(args);
-		console.log(chartData);
-		this.showPieChart(chartData['PIECHART']);
-		this.showBarChart(chartData['BARCHART']);
+		if(fromChartType == 'REFRESH') {
+			this.years = args['YEAR'];
+			this.months = args['MONTH'];
+
+			args['BUSINESSUNIT'] = this.businessUnits;
+			args['CUSTOMER'] = [];
+
+			var chartData = this.getData(args);
+
+			this.showPieChart(chartData['PIECHART']);
+			this.showBarChart(chartData['BARCHART']);
+		}
+		// Case 2: A selection is made in Pie chart
+		// and the bar chart and it's successors charts should
+		// propagate the selections made.
+		// Note: This should be called with BUSINESSUNITS args
+		else if(fromChartType == 'PIE') {
+			// Save this for making cluster chart later
+			this.businessUnits = args['BUSINESSUNITS'];
+
+			args['YEAR'] = this.years;
+			args['MONTH'] = this.months;
+			args['CUSTOMER'] = [];
+
+			var chartData = this.getData(args);
+			this.showBarChart(chartData['BARCHART']);
+		}
+		// Case 3: A selection is made in Bar chart
+		// and the cluster chart should propagate the selections made.
+		// Note: This should be called with CUSTOMER args
+		else {
+
+		}
 	},
 
 	this.getAllData = function(currentYear) {
@@ -141,7 +163,6 @@ var Visualization = function() {
 			var pieChartData = {};
 			pieChartData['label'] = busUnit;
 			pieChartData['data'] = revenueByBusinessUnit;
-			pieChartData['link'] = "";
 			pieChartDataArray[busUnitIndex++] = pieChartData;
 		}
 		//populate data for bar chart
@@ -180,8 +201,8 @@ var Visualization = function() {
 
 		var inputData = this.jsonObject['ALLDATA'];
 		//verify whether expected fields are present in arguments
-		var fields = ['BUSSINESSUNIT', 'YEAR', 'MONTH', 'CUSTOMER'];
-		var mandatoryFields = ['BUSSINESSUNIT', 'YEAR', 'MONTH'];
+		var fields = ['BUSINESSUNIT', 'YEAR', 'MONTH', 'CUSTOMER'];
+		var mandatoryFields = ['BUSINESSUNIT', 'YEAR', 'MONTH'];
 
 		if(!requireFields(args, fields, mandatoryFields)){
 			console.log("Visualization.js: getData():-Expected argument missing!");
@@ -189,7 +210,7 @@ var Visualization = function() {
 		}
 
 		//get required data from input object
-		var selectedBusinessUnits = args['BUSSINESSUNIT'];
+		var selectedBusinessUnits = args['BUSINESSUNIT'];
 		var selectedYears = args['YEAR'];
 		var selectedMonths = args['MONTH'];
 		var selectedCustomers = args['CUSTOMER'];
@@ -245,7 +266,6 @@ var Visualization = function() {
 				var pieChartData = {};
 				pieChartData['label'] = selectedBusinessUnits[busUnit];
 				pieChartData['data'] = revenueByBusinessUnit;
-				pieChartData['link'] = "";
 				pieChartDataArray[busUnitIndex++] = pieChartData;
 			}
 		}
@@ -293,7 +313,6 @@ var Visualization = function() {
 				var pieChartData = {};
 				pieChartData['label'] = selectedBusinessUnits[busUnit];
 				pieChartData['data'] = revenueByBusinessUnit;
-				pieChartData['link'] = "";
 				pieChartDataArray[busUnitIndex++] = pieChartData;
 			}
 
@@ -433,7 +452,14 @@ var Visualization = function() {
 
 			//display percent value in tool tip for the seleceted arc
 			tip.html(function(b) {
-				var message = "<strong>"+d.data.label+":</strong> <span style='color:red'>" + percent + "%</span>"+" <br /><strong> Revenue:</strong> <span style='color:red'>" + formatCurrency(d.data.data, 1) + "</span>";
+				var message = "<strong>"
+					+ d.data.label
+					+ ":</strong> <span style='color:red'>"
+						+ percent
+					+ "%</span>"
+					+ " <br /><strong> Revenue:</strong> <span style='color:red'>"
+					+ formatCurrency(d.data.data, 1)
+					+ "</span>";
 				return tableMessage;
 						//<br> <strong>"+ Revenue+":</strong> <span style='color:red'>" + d.data.dat + "%</span>";
 			})
@@ -464,7 +490,8 @@ var Visualization = function() {
 			var arcSelector = "." + "pie-" + pieName + "-arc-" + indexValue;
 			var selectedArc = d3.selectAll(arcSelector);
 			var colorValue = selectedArc.attr("color_value");
-			selectedArc.style("fill", colorValue);
+			if(selectedArc.attr('selected') == '0')
+				selectedArc.style("fill", colorValue);
 
 			tip.hide();
 		};
@@ -474,7 +501,6 @@ var Visualization = function() {
 			tip.style('top', (d3.event.layerY + 1) + 'px')
 				.style('left', (d3.event.layerX + 1) + 'px'); 
 		} */
-		
 		var tweenPie = function (b) {
 			b.innerRadius = 0;
 			var i = d3.interpolate({
@@ -528,7 +554,6 @@ var Visualization = function() {
 			// with a selection. The result is creating a <g> for every object in the data array
 			// Create a group to hold each slice (we will have a <path> and a <text>      // element associated with each slice)
 		.enter().append("svg:a")
-			.attr("xlink:href", function(d) { return d.data.link; })
 			.append("svg:g")
 			.attr("class", "slice")    //allow us to style things in the slices (like text)
 			// Set the color for each slice to be chosen from the color function defined above
@@ -542,10 +567,41 @@ var Visualization = function() {
 			.style("fill", function(d, i) { return colorScale(i); } )
 			.attr("color_value", function(d, i) { return colorScale(i); }) // Bar fill color...
 			.attr("index_value", function(d, i) { return "index-" + i; })
+			.attr('selected', function(d, i) { return '0';})
 			.attr("class", function(d, i) { return "pie-" + pieName + "-arc-index-" + i; })
 			.attr("d", arc)
 			.on('mouseover', synchronizedMouseOver)
 			.on("mouseout", synchronizedMouseOut)
+			.on("mousedown", function(data) {
+				var arc = d3.select(this);
+				var indexValue = arc.attr("index_value");
+
+				var arcSelector = "." + "pie-" + pieName + "-arc-" + indexValue;
+				var selectedArc = d3.selectAll(arcSelector);
+
+				// First time selected, push it to our list of stored business units
+				// , mark it selected by coloring it in Maroon and then update the bar chart.
+				if(selectedArc.attr('selected') == '0') {
+					selectedArc.attr('selected', '1');
+
+					selectedArc.style("fill", "Maroon");
+					parent.chartSelections.PIECHART[data.data.label] = '1';
+
+					parent.updateView({
+						'BUSINESSUNIT' : [ Object.keys(parent.chartSelections.PIECHART) ],
+					}, 'PIE');
+					Log('sending updateview for unit(s) ' + [ Object.keys(parent.chartSelections.PIECHART) ] );
+				}
+				// If it's already selected, replace maroon with it's old color
+				// and remove it from the stored list.
+				else {
+					var colorValue = selectedArc.attr("color_value");
+					selectedArc.style("fill", colorValue);
+
+					delete parent.chartSelections.PIECHART[data.data.label];
+					selectedArc.attr('selected', '0');
+				}
+			})
 			//.on("mousemove", synchronizedMouseMove)
 			.transition()
 			.ease("bounce")

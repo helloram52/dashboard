@@ -189,7 +189,7 @@ function gatherMonthYearsDataAndUpdateVisualization() {
 	chartVisualization.updateView({
 		'MONTH' : selectedMonths,
 		'YEAR' : selectedYears
-	});
+	}, 'REFRESH');
 }
 
 // Returns an array of id of the selected years
