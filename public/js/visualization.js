@@ -717,10 +717,6 @@ var Visualization = function() {
 			  axes: {
 				customers : 'y'
 			  },
-			  legend: {
-				  hide: true
-			  }
-			  ,
 			  types: {
 				customers : 'bar' // ADD
 			  }
@@ -744,13 +740,25 @@ var Visualization = function() {
 							+ "</tbody>"
 						+ "</table>";
 
-			    //return "<table><th>Customer</th><tr><td>"+d[0].value+"</td></tr></table>";
 			    return tooltipHTML;
 				//return defaultValueFormat;
 			  }
 			},
 			axis: {
 			  y: {
+			  	type: 'bar',
+			  	tick: {
+			  		count: 6,
+			  		format: function(x){
+
+		  				var revenue = x.toFixed(0).replace(/./g, function(c, i, a) {
+							return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+						});
+
+						return "$"+revenue;
+
+			  		}
+			  	},
 				label: {
 				  text: 'Revenue',
 				  position: 'outer-middle'
