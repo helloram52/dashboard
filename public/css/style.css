@@ -104,8 +104,8 @@ a {
 	outline: 1px solid black;
 	background: transparent;
 */
-	height: 400px;
-	width: 38%;
+	height: 350px;
+	width: 35%;
 	float: left;
 	position: relative;
 }
@@ -242,8 +242,8 @@ svg {
 
 .bubble-label {
   font: 15px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  text-anchor: middle;
-  /*text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff; */
+  text-anchor: text;
+  /*middle-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff; */
 }
 
 .bubble-label,

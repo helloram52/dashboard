@@ -80,7 +80,7 @@ var Visualization = function() {
 		if(pieChartData != undefined && pieChartData.length != 0) {
 			$('#pie-div').html('');
 			Log('drawing pie chart');
-			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 150, 5, 0);
+			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 145, 5, 0);
 		}
 		else {
 			Log('no data to draw pie chart');
@@ -717,8 +717,36 @@ var Visualization = function() {
 			  axes: {
 				customers : 'y'
 			  },
+			  legend: {
+				  hide: true
+			  }
+			  ,
 			  types: {
 				customers : 'bar' // ADD
+			  }
+			},
+			tooltip: {
+			  contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+
+			  	//format currency to have commas
+				var revenue = d[0].value.toFixed(0).replace(/./g, function(c, i, a) {
+					return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+				});
+
+				var tooltipHTML = "<table class='pie-tooltip'>"
+							+ "<tbody>"
+								+ "<tr>"
+									+ "<th colspan=2>" + d[0].x + "</th>"
+								+ "</tr>"
+								+ "<tr>"
+									+ "<td class='value'> $" + revenue + "</td>"
+								+ "</tr>"
+							+ "</tbody>"
+						+ "</table>";
+
+			    //return "<table><th>Customer</th><tr><td>"+d[0].value+"</td></tr></table>";
+			    return tooltipHTML;
+				//return defaultValueFormat;
 			  }
 			},
 			axis: {
@@ -823,7 +851,7 @@ var Visualization = function() {
 	this.drawBubbleChart = function(root, division) {
 
 		var margin = 20,
-		diameter = 360;
+		diameter = 340;
 
 		var color = d3.scale.linear()
 		.domain([-1, 5])
