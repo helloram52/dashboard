@@ -141,90 +141,10 @@ var Visualization = function() {
 			args['MONTH'] = this.months;
 
 			var chartData = this.getData(args);
-			Log('updating bar charts');
-			this.showBubbleChart(chartData['BARCHART']);
+			Log('updating bubble charts');
+			this.showBubbleChart(chartData['BUBBLECHART']);
 		}
 	},
-
-	this.getAllData = function(currentYear) {
-
-		//get required data from input object
-		var inputData = this.jsonObject['ALLDATA'];
-		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByCountry = 0;
-		var chartData = {};
-		var pieChartDataArray = [], barChartDataArray = [], bubbleChartDataArray = [];
-		var customerJSON = {};
-		var countryJSON = {};
-
-		//iterate the inputData for all customers and compose output for pieChart, Barchart and bubbleChart
-		for(var busUnit in inputData) {
-			var revenueByBusinessUnit = 0;
-			//for each year accumulate the revenue for charts 
-			var year = currentYear;
-			//for each month accumulate the revenue for charts
-			for(var month in inputData[busUnit][year]) {
-				revenueByBusinessUnit += inputData[busUnit][year][month]['TOTAL'];
-				var customers = inputData[busUnit][year][month];
-				for(var customer in customers){
-					//gather data for bar chart
-					if(customer != 'TOTAL'){
-						
-						revenueByCustomer = customers[customer]['TOTAL'];
-						
-						if(customerJSON.hasOwnProperty(customer)){
-							revenueByCustomer += customerJSON[customer];
-							customerJSON[customer] = revenueByCustomer;
-						}
-						 else {
-							customerJSON[customer] = revenueByCustomer;
-						}
-						//gather data for bubble chart
-						for(var country in customers[customer]){
-
-							if(country != 'TOTAL'){
-								revenueByCountry = customers[customer][country];
-								if(countryJSON.hasOwnProperty(country)){
-									revenueByCountry += countryJSON[country];
-									countryJSON[country] = revenueByCountry;
-								}
-								else{
-									countryJSON[country] = revenueByCountry;	
-								}
-							}
-						}
-					}
-				}
-			}
-			//populate data for pie chart
-			var pieChartData = {};
-			pieChartData['label'] = busUnit;
-			pieChartData['data'] = revenueByBusinessUnit;
-			pieChartDataArray[busUnitIndex++] = pieChartData;
-		}
-		//populate data for bar chart
-		for(customer in customerJSON){
-			var barChartData = {};
-			barChartData['label'] = customer;
-			barChartData['data'] = customerJSON[customer];
-			barChartDataArray[customerIndex++] = barChartData;
-		}
-
-		//populate data for bubble chart
-		countryIndex =0;
-		for(country in countryJSON){
-			var bubbleChartData = {};
-			bubbleChartData['label'] = country;
-			bubbleChartData['value'] = countryJSON[country];
-			bubbleChartDataArray[countryIndex++] = bubbleChartData;
-		}
-
-		chartData['PIECHART'] = pieChartDataArray;
-		chartData['BARCHART'] = barChartDataArray;
-		chartData['BUBBLECHART'] = bubbleChartDataArray;
-
-		return chartData;
-	},
-
 	/*
 	 * Parses given input json to fetch data that .
 	 * ChartData={
@@ -241,7 +161,7 @@ var Visualization = function() {
 		var mandatoryFields = ['BUSINESSUNIT', 'YEAR', 'MONTH'];
 
 		if(!requireFields(args, fields, mandatoryFields)) {
-			console.log("Visualization.js: getData():-Expected argument missing!");
+			Log("Visualization.js: getData():-Expected argument missing!");
 			return {};
 		}
 
@@ -250,7 +170,7 @@ var Visualization = function() {
 		var selectedYears = args['YEAR'];
 		var selectedMonths = args['MONTH'];
 		var selectedCustomers = args['CUSTOMER'];
-		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByCountry = 0;
+		var busUnitIndex = 0, customerIndex = 0, countryIndex=0, revenueByCustomer = 0, revenueByProdMix = 0;
 		var chartData = {};
 		var pieChartDataArray = [], barChartDataArray = [], bubbleChartDataArray = [];
 		var customerJSON = {};
@@ -296,13 +216,36 @@ var Visualization = function() {
 										for(var country in customers[customer]){
 
 											if(country != 'TOTAL'){
-												revenueByCountry = customers[customer][country];
-												if(countryJSON.hasOwnProperty(country)){
-													revenueByCountry += countryJSON[country];
-													countryJSON[country] = revenueByCountry;
-												}
-												else{
-													countryJSON[country] = revenueByCountry;	
+												
+												for(var prodMix in customers[customer][country]){
+
+													if(countryJSON.hasOwnProperty(country)){
+
+														if(countryJSON[country].hasOwnProperty(selectedBusUnit)) {
+															
+															revenueByProdMix = customers[customer][country][prodMix];
+
+															if(countryJSON[country][selectedBusUnit].hasOwnProperty(prodMix)){
+
+																revenueByProdMix += countryJSON[country][selectedBusUnit][prodMix];
+																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
+
+															}
+															else {
+																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
+															}
+														}
+														else {
+															countryJSON[country][selectedBusUnit] = {};
+															countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];	
+														}
+													}
+													else{
+
+														countryJSON[country] = {};
+														countryJSON[country][selectedBusUnit] = {};
+														countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];
+													}
 												}
 											}
 										}
@@ -360,13 +303,36 @@ var Visualization = function() {
 										for(var country in customers[customer]){
 
 											if(country != 'TOTAL'){
-												revenueByCountry = customers[customer][country];
-												if(countryJSON.hasOwnProperty(country)){
-													revenueByCountry += countryJSON[country];
-													countryJSON[country] = revenueByCountry;
-												}
-												else{
-													countryJSON[country] = revenueByCountry;	
+												
+												for(var prodMix in customers[customer][country]){
+
+													if(countryJSON.hasOwnProperty(country)){
+
+														if(countryJSON[country].hasOwnProperty(selectedBusUnit)) {
+															
+															revenueByProdMix = customers[customer][country][prodMix];
+
+															if(countryJSON[country][selectedBusUnit].hasOwnProperty(prodMix)){
+
+																revenueByProdMix += countryJSON[country][selectedBusUnit][prodMix];
+																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
+
+															}
+															else {
+																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
+															}
+														}
+														else {
+															countryJSON[country][selectedBusUnit] = {};
+															countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];	
+														}
+													}
+													else{
+
+														countryJSON[country] = {};
+														countryJSON[country][selectedBusUnit] = {};
+														countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];
+													}
 												}
 											}
 										}
@@ -394,17 +360,54 @@ var Visualization = function() {
 		}
 
 		//populate data for bubble chart
-		countryIndex =0;
-		for(country in countryJSON){
-			var bubbleChartData = {};
-			bubbleChartData['label'] = country;
-			bubbleChartData['value'] = countryJSON[country];
-			bubbleChartDataArray[countryIndex++] = bubbleChartData;
+
+		/*{
+			"Name" 		: busUnit,
+			"children"	: [
+				{"Name": <prodMix>, "size": <revenue>},
+				{"Name": <prodMix>, "size": <revenue>}
+			]
+		}
+			
+		*/
+		var bubbleChartArray = [];
+		var bubbleChartData = { 
+			Name: "Bubble",
+			children: bubbleChartArray
+		};
+
+		var countryIndex = 0;
+		for(country in countryJSON) {	
+
+			var bubbleChart = {};
+			bubbleChart['name'] = country;
+			bubbleChart['children'] =[];
+
+			var busUnitIndex = 0;
+			for(var busUnit in countryJSON[country]) {
+
+				bubbleChart['children'][busUnitIndex] ={};
+				bubbleChart['children'][busUnitIndex]['name'] = busUnit;
+				bubbleChart['children'][busUnitIndex]['children'] = [];
+
+				var prodIndex = 0;
+				for(var prodMix in countryJSON[country][busUnit]) {
+
+					bubbleChart['children'][busUnitIndex]['children'][prodIndex] ={};
+					bubbleChart['children'][busUnitIndex]['children'][prodIndex]['name'] = prodMix;				
+					bubbleChart['children'][busUnitIndex]['children'][prodIndex]['size'] = countryJSON[country][busUnit][prodMix];				
+					prodIndex++;
+				}
+				
+				busUnitIndex++;
+			}
+
+			bubbleChartArray[countryIndex++] = bubbleChart;
 		}
 
 		chartData['PIECHART'] = pieChartDataArray;
 		chartData['BARCHART'] = barChartDataArray;
-		chartData['BUBBLECHART'] = bubbleChartDataArray;
+		chartData['BUBBLECHART'] = bubbleChartData;
 
 		return chartData;
 	},
@@ -817,38 +820,83 @@ var Visualization = function() {
 
 	}*/
 
-	this.drawBubbleChart = function(dataset, division) {
-		var diameter = 500,
-		format = d3.format(",d"),
-		color = d3.scale.category20();
+	this.drawBubbleChart = function(root, division) {
 
-		var bubble = d3.layout.pack()
-		.sort(null)
-		.size([diameter, diameter])
-		.padding(1.5);
+		var margin = 20,
+		diameter = 480;
+
+		var color = d3.scale.linear()
+		.domain([-1, 5])
+		.range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+		.interpolate(d3.interpolateHcl);
+
+		var pack = d3.layout.pack()
+		.padding(2)
+		.size([diameter - margin, diameter - margin])
+		.value(function(d) { return d.size; })
 
 		var svg = d3.select(division).append("svg")
 		.attr("width", diameter)
 		.attr("height", diameter)
-		.attr("class", "bubble");
+		.append("g")
+		.attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
-		var node = svg.selectAll(".node")
-		  .data(bubble.nodes({children: dataset}))
-		.enter().append("g")
-		  .attr("class", "node")
-		  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+		var focus = root,
+		nodes = pack.nodes(root),
+		view;
 
-		node.append("title")
-		  .text(function(d) { return d.label + ": " + formatCurrency(d.value, 1); });
+		var circle = svg.selectAll("circle")
+		.data(nodes)
+		.enter().append("circle")
+		.attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
+		.style("fill", function(d) { return d.children ? color(d.depth) : null; })
+		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
 
-		node.append("circle")
-		  .attr("r", function(d) { return d.r; })
-		  .style("fill", function(d) { return color(d.label); });
+		var text = svg.selectAll("text")
+		.data(nodes)
+		.enter().append("text")
+		.attr("class", "bubble-label")
+		.style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
+		.style("display", function(d) { return d.parent === root ? "inline" : "none"; })
+		.text(function(d) { return d.name; });
 
-		node.append("text")
-		  .attr("dy", ".3em")
-		  .style("text-anchor", "middle")
-		  .text(function(d) { if(d.label != undefined) return d.label.substring(0, d.r / 3); });
+		var node = svg.selectAll("circle,text");
+
+		d3.select(division)
+		//.style("background", color(-1))
+		.on("click", function() { zoom(root); });
+
+		zoomTo([root.x, root.y, root.r * 2 + margin]);
+
+		function zoom(d) {
+		var focus0 = focus; focus = d;
+
+		var transition = d3.transition()
+		.duration(d3.event.altKey ? 7500 : 750)
+		.tween("zoom", function(d) {
+		  var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+		  return function(t) { zoomTo(i(t)); };
+		});
+
+		transition.selectAll("text")
+		.filter(function(d) { 
+			if(!d) 
+				return false;
+			return d.parent === focus || this.style.display === "inline"; })
+		.style("fill-opacity", function(d) { 
+			if(!d) 
+				return false;
+			return d.parent === focus ? 1 : 0; })
+		.each("start", function(d) { 
+			if (d && d.parent === focus) this.style.display = "inline"; })
+		.each("end", function(d) { if (d && d.parent !== focus) this.style.display = "none"; });
+		}
+
+		function zoomTo(v) {
+		var k = diameter / v[2]; view = v;
+		node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+		circle.attr("r", function(d) { return d.r * k; });
+		}
 
 		d3.select(self.frameElement).style("height", diameter + "px");
 	},
@@ -857,3 +905,5 @@ var Visualization = function() {
 
 	}
 };
+
+
