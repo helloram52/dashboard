@@ -35,7 +35,15 @@ function InList(arr, value) {
 	return -1;
 }
 
-//format currency
+/* Given a number like 123456789 and the number of digits to follow after the decimal,
+ * returns the formatted currency i.e. '123.45 B' (for digits=2)
+ * k - thousands
+ * M - million
+ * B - billion
+ * T - trillion
+ * P - quadrillionth
+ * E - quintillionth
+ */
 function formatCurrency(num, digits) {
 	var si = [
 		{ value: 1E18, symbol: "E" },
@@ -44,10 +52,11 @@ function formatCurrency(num, digits) {
 		{ value: 1E9,  symbol: "B" },
 		{ value: 1E6,  symbol: "M" },
 		{ value: 1E3,  symbol: "k" }
-		], i;
-	for (i = 0; i < si.length; i++) {
+	];
+
+	for (var i = 0; i < si.length; i++) {
 		if (num >= si[i].value) {
-			return (num / si[i].value).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, "$1") + si[i].symbol;
+			return (num / si[i].value).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, "$1") + ' ' + si[i].symbol;
 		}
 	}
 	return num.toString();
@@ -88,7 +97,6 @@ function requireFields(args, fields, mandatoryFields){
 }
 
 function convertDataForBarChart(JSONdata) {
-
 	//input format
 	/*
 		JSONdata = [
@@ -107,7 +115,6 @@ function convertDataForBarChart(JSONdata) {
 		
 		]	
 	*/
-
 	var dataArray = ['customers'], index1 = dataArray.length;
 	var labelArray = ['customers'], index2 = labelArray.length;
 	
@@ -121,4 +128,21 @@ function convertDataForBarChart(JSONdata) {
 		'dataArray' : dataArray,
 		'labelArray': labelArray 
 	};
+}
+
+/*
+ * Provides sprintf functionality. Examples:
+ * - "This is an test {0}, {1}, {2}".format(1, 2, 3)
+ * - "This is an test {0}, {1}, {2}".format([1, 2, 3])
+ */
+String.prototype.format = function() {
+	var str = this.toString();
+	if (!arguments.length)
+		return str;
+
+	var args = typeof arguments[0],
+		args = (("string" == args || "number" == args) ? arguments : arguments[0]);
+	for (arg in args)
+		str = str.replace(RegExp("\\{" + arg + "\\}", "gi"), args[arg]);
+	return str;
 }

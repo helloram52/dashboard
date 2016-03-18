@@ -117,6 +117,7 @@ var Visualization = function() {
 			if(args['BUSINESSUNIT'].length == 0) {
 				Log('business unit length is zero.. pulling data from json');
 				this.setBusinessUnitsFromJSON();
+				args['BUSINESSUNIT'] = this.businessUnits;
 			}
 			else {
 				this.businessUnits = args['BUSINESSUNIT'];
@@ -511,43 +512,27 @@ var Visualization = function() {
 			}));
 
 			var percent = 0;
-
 			if(total)
 				percent = Math.round(1000 * d.data.data / total) / 10;
-			var tableMessage = "<table border='2' align='center'><tr><td >BU</td><td bgcolor='green' align='center'>"+ d.data.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data.data, 1) +"</td></tr><tr><td>Percentage</td><td bgcolor='green' align='center'>"+ percent +"%</td></tr></table>";
+
+			var tooltipHTML = "<table class='pie-tooltip'>"
+				+ "<tbody>"
+					+ "<tr>"
+						+ "<th colspan=2>" + d.data.label + "</th>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>"
+							+ percent + "%"
+						+ "</td>"
+						+ "<td class='value'>" + formatCurrency(d.data.data, 3) + "</td>"
+					+ "</tr>"
+				+ "</tbody>"
+			+ "</table>";
 
 			//display percent value in tool tip for the seleceted arc
-			tip.html(function(b) {
-				var message = "<strong>"
-					+ d.data.label
-					+ ":</strong> <span style='color:red'>"
-						+ percent
-					+ "%</span>"
-					+ " <br /><strong> Revenue:</strong> <span style='color:red'>"
-					+ formatCurrency(d.data.data, 1)
-					+ "</span>";
-
-				return tableMessage;
-			})
+			tip.html(tooltipHTML);
 			tip.show();
 		};
-
-		function formatCurrency(num, digits) {
-			var si = [
-				{ value: 1E18, symbol: "E" },
-				{ value: 1E15, symbol: "P" },
-				{ value: 1E12, symbol: "T" },
-				{ value: 1E9,  symbol: "B" },
-				{ value: 1E6,  symbol: "M" },
-				{ value: 1E3,  symbol: "k" }
-				], i;
-			for (i = 0; i < si.length; i++) {
-				if (num >= si[i].value) {
-					return (num / si[i].value).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, "$1") + si[i].symbol;
-				}
-			}
-			return num.toString();
-		}
 
 		//handle mouseOut event
 		var synchronizedMouseOut = function(d) {
@@ -698,16 +683,14 @@ var Visualization = function() {
 			var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
 			return a > 90 ? a - 180 : a;
 		}
-		
 	},
 
 	this.drawBarChart = function(dataset, division) {
-
 		var JSONdata = convertDataForBarChart(dataset);
 		var yAxisData = JSONdata['dataArray'];
 		var labelData = JSONdata['labelArray'];
 
-		console.log("drawing bar chart");
+		Log("drawing bar chart");
 		
 		c3.generate({
 		    bindto: division,
@@ -744,7 +727,7 @@ var Visualization = function() {
 		d3.selectAll('.c3-event-rect')
 			.on('click', function(value, index) {
 				d3.select('.c3-event-rect-' + index).style('fill', 'yellow').style('opacity', '1');
-				console.log("index = " + index + " value = " + columnData[index]);
+				Log("index = " + index + " value = " + columnData[index]);
 			});
 	},
 
@@ -822,8 +805,6 @@ var Visualization = function() {
 	}*/
 
 	this.drawBubbleChart = function(dataset, division) {
-
-
 		var diameter = 500,
 		format = d3.format(",d"),
 		color = d3.scale.category20();
@@ -857,7 +838,6 @@ var Visualization = function() {
 		  .text(function(d) { if(d.label != undefined) return d.label.substring(0, d.r / 3); });
 
 		d3.select(self.frameElement).style("height", diameter + "px");
-
 	},
 
 	this.destroy = function() {
