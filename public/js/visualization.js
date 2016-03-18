@@ -80,7 +80,7 @@ var Visualization = function() {
 		if(pieChartData != undefined && pieChartData.length != 0) {
 			$('#pie-div').html('');
 			Log('drawing pie chart');
-			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 100, 5, 0);
+			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 150, 5, 0);
 		}
 		else {
 			Log('no data to draw pie chart');
@@ -823,7 +823,7 @@ var Visualization = function() {
 	this.drawBubbleChart = function(root, division) {
 
 		var margin = 20,
-		diameter = 480;
+		diameter = 360;
 
 		var color = d3.scale.linear()
 		.domain([-1, 5])

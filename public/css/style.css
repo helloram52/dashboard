@@ -83,7 +83,7 @@ a {
 	outline: 1px solid black;
 	background: transparent;
 */
-	height: 300px;
+	/*height: 300px;*/
 	position: relative;
 }
 
@@ -93,7 +93,9 @@ a {
 	outline: 1px solid black;
 	background: transparent;
 */
-	height: 300px;
+	height: 400px;
+	width: 25%;
+	float:left;
 	position: relative;
 }
 
@@ -103,7 +105,8 @@ a {
 	background: transparent;
 */
 	height: 400px;
-	width: 700px;
+	width: 38%;
+	float: left;
 	position: relative;
 }
 
@@ -113,6 +116,8 @@ a {
 	background: transparent;
 */
 	height: 300px;
+	width: 33%;
+	float: right;
 	position: relative;
 }
 
