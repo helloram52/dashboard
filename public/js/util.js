@@ -35,8 +35,8 @@ function InList(arr, value) {
 	return -1;
 }
 
-/* Given a number like 123456789 and the number of digits to follow after the decimal,
- * returns the formatted currency i.e. '123.45 B' (for digits=2)
+/* Given a number like 123456789, the number of digits to follow after the decimal,
+ * and the symbol to use(optional), returns the formatted currency i.e. '123.45 B' (for digits=2)
  * k - thousands
  * M - million
  * B - billion
@@ -44,22 +44,28 @@ function InList(arr, value) {
  * P - quadrillionth
  * E - quintillionth
  */
-function formatCurrency(num, digits) {
-	var si = [
-		{ value: 1E18, symbol: "E" },
-		{ value: 1E15, symbol: "P" },
-		{ value: 1E12, symbol: "T" },
-		{ value: 1E9,  symbol: "B" },
-		{ value: 1E6,  symbol: "M" },
-		{ value: 1E3,  symbol: "k" }
-	];
+function formatCurrency(num, digits, symbol) {
+	var SI = {
+		'E' : 1E18,
+		'P' : 1E15,
+		'T'	: 1E12,
+		'B' : 1E9,
+		'M' : 1E6,
+		'k' : 1E3
+	};
 
-	for (var i = 0; i < si.length; i++) {
-		if (num >= si[i].value) {
-			return (num / si[i].value).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, "$1") + ' ' + si[i].symbol;
-		}
+	if(SI.hasOwnProperty(symbol)) {
+		return (num / SI[symbol]).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, "$1") + ' ' + symbol;
 	}
-	return num.toString();
+	else {
+		for (var key in SI) {
+			if (num >= SI[key]) {
+				return (num / SI[key]).toFixed(digits).replace(/\.0+$|(\.[0-9]*[1-9])0+$/, "$1") + ' ' + key;
+			}
+		}
+
+		return num.toString();
+	}
 }
 
 

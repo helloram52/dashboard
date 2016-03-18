@@ -80,7 +80,7 @@ var Visualization = function() {
 		if(pieChartData != undefined && pieChartData.length != 0) {
 			$('#pie-div').html('');
 			Log('drawing pie chart');
-			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 150, 5, 0);
+			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 100, 5, 0);
 		}
 		else {
 			Log('no data to draw pie chart');
@@ -505,7 +505,7 @@ var Visualization = function() {
 
 			var arcSelector = "." + "pie-" + pieName + "-arc-" + indexValue;
 			var selectedArc = d3.selectAll(arcSelector);
-			selectedArc.style("fill", "Maroon");
+			selectedArc.style("fill", "maroon");
 
 			var total = d3.sum(dataset.map(function(d) {
 				return d.data;
@@ -524,7 +524,7 @@ var Visualization = function() {
 						+ "<td>"
 							+ percent + "%"
 						+ "</td>"
-						+ "<td class='value'>" + formatCurrency(d.data.data, 3) + "</td>"
+						+ "<td class='value'> $" + formatCurrency(d.data.data, 1, 'M') + "</td>"
 					+ "</tr>"
 				+ "</tbody>"
 			+ "</table>";
@@ -572,12 +572,15 @@ var Visualization = function() {
 			.attr("height", canvasHeight) //set the height of the canvas
 			.append("svg:g") //make a group to hold our pie chart
 			.attr("transform", "translate(" + pieCenterX + "," + pieCenterY + ")") // Set center of pie
+			.call(tip); //attach tip to canvas div
 
-		canvas.call(tip); //attach tip to canvas div
 		// Define an arc generator. This will create <path> elements for using arc data.
 		var arc = d3.svg.arc()
 			.innerRadius(innerRadius) // Causes center of pie to be hollow
 			.outerRadius(outerRadius);
+
+		var arcOver = d3.svg.arc()
+			.outerRadius(outerRadius + 10);
 
 		// Define a pie layout: the pie angle encodes the value of dataset.
 		// Since our data is in the form of a post-parsed CSV string, the
@@ -625,8 +628,8 @@ var Visualization = function() {
 			.on('mouseover', synchronizedMouseOver)
 			.on("mouseout", synchronizedMouseOut)
 			.on("mousedown", function(data) {
-				var arc = d3.select(this);
-				var indexValue = arc.attr("index_value");
+				var currentArc = d3.select(this);
+				var indexValue = currentArc.attr("index_value");
 
 				var arcSelector = "." + "pie-" + pieName + "-arc-" + indexValue;
 				var selectedArc = d3.selectAll(arcSelector);
@@ -635,8 +638,13 @@ var Visualization = function() {
 				// , mark it selected by coloring it in Maroon and then update the bar chart.
 				if(selectedArc.attr('selected') == '0') {
 					selectedArc.attr('selected', '1');
+					currentArc.attr("stroke","white")
+						.transition()
+						.duration(1000)
+						.attr("d", arcOver)             
+						.attr("stroke-width", 6);
 
-					selectedArc.style("fill", "Maroon");
+					//selectedArc.style("fill", "Maroon");
 					parent.chartSelections.PIECHART[data.data.label] = '1';
 
 					parent.updateView({
@@ -646,11 +654,15 @@ var Visualization = function() {
 				// If it's already selected, replace maroon with it's old color
 				// and remove it from the stored list.
 				else {
-					var colorValue = selectedArc.attr("color_value");
-					selectedArc.style("fill", colorValue);
+					//var colorValue = selectedArc.attr("color_value");
+					//selectedArc.style("fill", colorValue);
 
 					delete parent.chartSelections.PIECHART[data.data.label];
 					selectedArc.attr('selected', '0');
+
+					currentArc.transition()            
+						.attr("d", arc)
+						.attr("stroke","none");
 
 					parent.updateView({
 						'BUSINESSUNIT' : Object.keys(parent.chartSelections.PIECHART),
@@ -665,7 +677,8 @@ var Visualization = function() {
 			.attrTween("d", tweenPie);
 
 		// Add a magnitude value to the larger arcs, translated to the arc centroid and rotated.
-		arcs.filter(function(d) { return d.endAngle - d.startAngle > .2; }).append("svg:text")
+		arcs.filter(function(d) { return d.endAngle - d.startAngle > .2; })
+			.append("svg:text")
 			.attr("dy", ".35em")
 			.attr("text-anchor", "middle")
 			.attr("transform", function(d) { //set the label's origin to the center of the arc
@@ -693,33 +706,33 @@ var Visualization = function() {
 		Log("drawing bar chart");
 		
 		c3.generate({
-		    bindto: division,
-		    data: {
-		      columns: [
-		      	yAxisData
-		      ],
-		      axes: {
-		        customers : 'y'
-		      },
-		      types: {
-		        customers : 'bar' // ADD
-		      }
-		    },
-		    axis: {
-		      y: {
-		        label: {
-		          text: 'Revenue',
-		          position: 'outer-middle'
-		        }
-		      },
-		      y2: {
-		        show: false,
-		        label: {
-		          text: 'Y2 Label',
-		          position: 'outer-middle'
-		        }
-		      }
-		    }
+			bindto: division,
+			data: {
+			  columns: [
+				yAxisData
+			  ],
+			  axes: {
+				customers : 'y'
+			  },
+			  types: {
+				customers : 'bar' // ADD
+			  }
+			},
+			axis: {
+			  y: {
+				label: {
+				  text: 'Revenue',
+				  position: 'outer-middle'
+				}
+			  },
+			  y2: {
+				show: false,
+				label: {
+				  text: 'Y2 Label',
+				  position: 'outer-middle'
+				}
+			  }
+			}
 		});
 
 		 //c3-event-rect c3-event-rect-12

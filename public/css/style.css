@@ -12,45 +12,14 @@ a {
 	outline: none;
 }
 
-.land {
-	fill: #ddd;
-}
-
-path {
-	stroke: grey;
-	stroke-width: 0.5px;
-	fill: #ccc;
-}
-
-.bubble {
-	fill-opacity: .5;
-	stroke: #fff;
-	stroke-width: .5px;
-	fill: brown;
-}
-
-.bubble :hover {
-	stroke: black;
-}
-
-#controls {
-	position: relative;
-	left: 15px;
-	top: 250px;
-}
-
-.cq-1, .cq-2, .cq-4 {
-	display: none;
-}
-
-#menu-toggle {
-	padding-right:20px;
-}
-
 .container .btn-group .active,
 .container .btn-group-vertical .active {
 	background-color : green
 }
+
+/*
+ * CSS for year and quarter button groups
+ */
 #year-wrapper {
 /*
 	border-right-width: 1px;
@@ -61,6 +30,7 @@ path {
 	width: 120px;
 	float: left;
 }
+
 #year-btn-wrapper {
 	overflow-y: scroll;
 	height: 200px;
@@ -75,6 +45,38 @@ path {
 	border-bottom-color: black;
 */
 }
+
+/*
+ * CSS for loading indicator
+ */
+
+.loadingbtn {
+	display:-webkit-box;
+	-webkit-box-pack:center;
+	-webkit-box-align:center;
+	float: none;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.glyphicon-refresh-animate {
+	-animation: spin .7s infinite linear;
+	-webkit-animation: spin .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+	from { -webkit-transform: rotate(0deg);}
+	to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+	from { transform: scale(1) rotate(0deg);}
+	to { transform: scale(1) rotate(360deg);}
+}
+
+/*
+ * The below contain css for the visualization area.
+ */
 
 #canvas-div {
 /*
@@ -105,7 +107,7 @@ path {
 	position: relative;
 }
 
-#cluster-div {
+#bubble-div {
 /*
 	outline: 1px solid black;
 	background: transparent;
@@ -114,42 +116,6 @@ path {
 	position: relative;
 }
 
-#footer {
-	bottom: 0;
-	color: black;
-	position: absolute;
-	right: 0;
-	width: 235px;
-	z-index: 999999;
-}
-
-.loadingbtn {
-	display:-webkit-box;
-	-webkit-box-pack:center;
-	-webkit-box-align:center;
-	float: none;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.glyphicon-refresh-animate {
-	-animation: spin .7s infinite linear;
-	-webkit-animation: spin .7s infinite linear;
-}
-
-@-webkit-keyframes spin2 {
-	from { -webkit-transform: rotate(0deg);}
-	to { -webkit-transform: rotate(360deg);}
-}
-
-@keyframes spin {
-	from { transform: scale(1) rotate(0deg);}
-	to { transform: scale(1) rotate(360deg);}
-}
-
-/*
- * The below contain css for the visualization area.
- */
 svg {
 	font: 10px sans-serif;
 	display: block;
@@ -205,10 +171,6 @@ svg {
 	shape-rendering: crispEdges;
 }
 
-text {
-	font: 10px sans-serif;
-}
-
 /*
  * CSS for Pie Chart
  */
@@ -225,7 +187,7 @@ text {
 
 .pie-tooltip th {
 	background-color: #aaa;
-	font-size: 14px;
+	font-size: 12px;
 	padding: 2px 5px;
 	text-align: left;
 	color: #FFF;
@@ -244,4 +206,18 @@ text {
 
 .pie-tooltip td.value {
 	text-align: right;
+}
+
+/*
+ * CSS for Bubble Chart
+ */
+.bubble {
+	fill-opacity: .5;
+	stroke: #fff;
+	stroke-width: .5px;
+	fill: brown;
+}
+
+.bubble :hover {
+	stroke: black;
 }
