@@ -701,7 +701,100 @@ var Visualization = function() {
 		}
 	},
 
-	this.drawBarChart = function(dataset, division) {
+	this.drawBarChart = function(dataset, selectString) {
+		var elt = d3.select(selectString);
+			var width = 720, 
+				height = 400;
+			var stockData = null,
+				yMax;
+			var totalRevenue = d3.sum(dataset.map(function(d) {
+				return d.data;
+			}));
+
+		var mouseDownEventHandler = function(el, data) {
+			var currentBar = d3.select(this);
+			// First time selected, push it to our list of stored customer units
+			// , mark it selected by coloring it in Maroon and then update the bar chart.
+			if(currentBar.attr('selected') == '0') {
+				currentBar.attr('selected', '1');
+				currentBar.style("fill", "maroon");
+
+				parent.chartSelections.BARCHART[ data[0] ] = '1';
+				parent.updateView({
+					'CUSTOMER' : Object.keys(parent.chartSelections.BARCHART),
+				}, 'BAR');
+			}
+			// If it's already selected, replace maroon with it's old color
+			// and remove it from the stored list.
+			else {
+				delete parent.chartSelections.BARCHART[ data[0] ];
+				currentBar.attr('selected', '0');
+
+				// this should reflect the color of the bar originally
+				// which is currently set to a constant in barchart.js
+				currentBar.style("fill", "steelblue");
+				parent.updateView({
+					'CUSTOMER' : Object.keys(parent.chartSelections.BARCHART),
+				}, 'BAR');
+			}
+		};
+
+		function showHover(el, d) {
+			var percent = 0;
+			percent = Math.round(1000 * d[1] / totalRevenue) / 10;
+
+			var currentBar = d3.select(this);
+			currentBar.style('fill', 'maroon');
+
+			var hoverDiv = d3.selectAll("#hover");
+			var html = '<h2>' + d[0] + '</h2>';
+			html += '<div class="key-value"><div class="value">' + percent + '%</div><div class="key">Revenue Percentage</div></div>';
+			html += '<div class="key-value"><div class="value">' + d3.format("$,.3r")(+d[1]) + "m" + '</div><div class="key"> Revenue </div></div>';
+			hoverDiv.html(html);
+			hoverDiv.style("opacity", 1);
+		}
+
+		function hideHover(el, d) {
+			var currentBar = d3.select(this);
+			// If this isn't selected by mouse, restore the original color
+			if(currentBar.attr('selected') == '0')
+				currentBar.style("fill", 'steelblue');
+
+			var hoverDiv = d3.selectAll("#hover");
+			hoverDiv.style("opacity", 1e-6);
+		}
+		var rangeWidget = d3.elts.startEndSlider().minRange(30);
+		var milDol = function(v) { return d3.format("$,.0f")(v)+"m"};
+		var myChart = d3.elts.barChart()
+			.width(width)
+			.height(height)
+			.yMin(0)
+			.rangeWidget(rangeWidget)
+			.yAxis(d3.svg.axis().orient("left").tickSize(6, 0).tickFormat(milDol))
+			.xDomain([0, 30])
+			.xAxisIfBarsWiderThan(11)
+			//.xAxisAnimate(false)
+			.mouseOver(function(el, d) { showHover(el, d) })
+			.mouseOut(function(el, d) { hideHover(el, d) })
+			.mouseDown(function(el, d) { mouseDownEventHandler(el, d) })
+			.margin({top: 40, right: 20, bottom: 60, left: 100});
+
+		redraw = function(sortCol) {
+			stockData = _.sortBy(stockData, function(d) { if (sortCol===1) return -d[1]; else return d[0]; });
+			myChart.yMax(function(data) {
+				var high = d3.max(data, function(d) {return d[1]}); 
+				return high; // scales up small values, but not to the top
+			});
+			elt.datum(stockData).call(myChart);
+		}
+
+		stockData = _.map(dataset, function(d) {
+			return [ d.label, d.data ];
+		});
+		yMax = d3.max(stockData, function(d) {return d[1]});
+		redraw(1);
+	},
+/*
 		var JSONdata = convertDataForBarChart(dataset);
 		var yAxisData = JSONdata['dataArray'];
 		var labelData = JSONdata['labelArray'];
@@ -783,7 +876,6 @@ var Visualization = function() {
 			});
 	},
 
-/*
 	this.drawBarChart = function(dataset, division){		
 		var margin = {top: 20, right: 20, bottom: 30, left: 40},
 		width = 800 - margin.left - margin.right,
