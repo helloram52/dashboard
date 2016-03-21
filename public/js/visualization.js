@@ -711,6 +711,10 @@ var Visualization = function() {
 					'CUSTOMER' : Object.keys(parent.chartSelections.BARCHART),
 				}, 'BAR');
 			}
+
+			// The current selection is returned so that we could render selected charts on
+			// 
+			return Object.keys(parent.chartSelections.BARCHART);
 		};
 
 		function showHover(element, d) {
@@ -774,7 +778,7 @@ var Visualization = function() {
 			.xAxisAnimate(false)
 			.mouseOver(function(el, d) { showHover(el, d) })
 			.mouseOut(function(el, d) { hideHover(el, d) })
-			.mouseDown(function(el, d) { mouseDownEventHandler(el, d) })
+			.mouseDown(function(el, d) { Log('viz.js before returning..');return mouseDownEventHandler(el, d); })
 			.margin({top: 40, right: 20, bottom: 60, left: 100})
 			.attachTip(tip);
 

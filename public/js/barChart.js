@@ -47,14 +47,24 @@ var d3 = (function (d3, _) {
 			commasFormatter = d3.format(",.0f"),
 			yAxis = d3.svg.axis().orient("left").tickSize(6, 0).tickFormat(commasFormatter), // set to null for none (faster than hiding it)
 			yNoOverlap = 18,
-			fill = function(d) { return d[1]>=0 ? "steelblue" : "#BB6666" },
-			stroke = function(d) { return d[1]>=0 ? "gray" : "#BB6666" },
+			fill = function(d) {
+				if(currentSelections != null && _.indexOf(currentSelections, d[0]) != -1) {
+					// TO DO: Get rid of this hack and find a way to fill the bar with maroon
+					// using only one fill.
+					d3.select(this).style('fill', 'maroon');
+					return 'maroon';
+				}
+
+				return "steelblue";
+			},
+			stroke = function(d) { return "#fff";},
 			mouseOver = function() {}, // function(elt, d) {}
 			mouseOut = function() {}, // function(elt, d) {}
 			mouseDown = function() {}, // function(elt, d) {}
 			rangeWidget = null,
 			xDomain = null, // set this to positions [start, end] into the data, to restrict the x domain
-			tip = null;
+			tip = null,
+			currentSelections = null;
 
 		var hadXAxis = false;
 
@@ -126,12 +136,18 @@ var d3 = (function (d3, _) {
 					.attr("width", xScale.rangeBand())
 					.attr("fill", fill)
 					.attr("stroke", stroke)
-					.attr('selected', function(d, i){ return '0';});
+					.attr('selected', function(d, i) {
+						// If the current bar is selected, mark it's selected attribute as zero.
+						if(currentSelections != null && _.indexOf(currentSelections, d[0]) != -1) {
+							return '1';
+						}
+						return '0';
+					});
 
 				// UPDATE
 				bars.on("mouseover", function(d) { mouseOver(this, d) }) // put these on the update in case they have changed
 					.on("mouseout", function(d) { mouseOut(this, d) })
-					.on("mousedown", function(d) { mouseDown(this, d) })
+					.on("mousedown", function(d) { currentSelections = mouseDown(this, d); Log('currentSelections in barchart.js : ' + currentSelections); })
 					.transition()
 						.duration(duration)
 						.attr("x", xX )

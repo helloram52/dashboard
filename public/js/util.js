@@ -152,3 +152,13 @@ String.prototype.format = function() {
 		str = str.replace(RegExp("\\{" + arg + "\\}", "gi"), args[arg]);
 	return str;
 }
+
+// Trigger to handle triggers in d3 js
+// Todo: get rid of this and find a way to make SVG color a bar's per the changed fill attribute.
+$.fn.triggerSVGEvent = function(eventName) {
+	var event = document.createEvent('SVGEvents');
+	event.initEvent(eventName,true,true);
+	this[0].dispatchEvent(event);
+
+	return $(this);
+};

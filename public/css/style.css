@@ -217,6 +217,15 @@ svg {
 }
 
 /*
+ * CSS for Bar Chart
+ */
+
+.bar.selected {
+	fill: maroon;
+}
+
+
+/*
  * CSS for Bubble Chart
  */
 .bubble {
