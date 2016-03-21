@@ -35,12 +35,13 @@ var d3 = (function (d3, _) {
 			xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickSize(6, 0),  // set to null for none (faster than hiding it)
 			xAxisIfBarsWiderThan = null, // set this to only show the xAxis if the bars are wider than some amount
 			xAxisTickFormat = null, // can be a function of the actual data, not just the primary id, eg. function(d) { return d[2] }
-			xAxisText = function(textSel) {textSel.attr("x", -8)
-							.attr("y", 0)
-							.attr("dy", ".35em")
-							.attr("transform", "rotate(-90)")
-							.style("text-anchor", "end");
-						},
+			xAxisText = function(textSel) {
+				textSel.attr("x", -8)
+				.attr("y", 0)
+				.attr("dy", ".35em")
+				.attr("transform", "rotate(-65)")
+				.style("text-anchor", "end");
+			},
 			xAxisAnimate = true,
 			yValueOfXAxis = 0,  // or a function of the data
 			commasFormatter = d3.format(",.0f"),
@@ -52,7 +53,8 @@ var d3 = (function (d3, _) {
 			mouseOut = function() {}, // function(elt, d) {}
 			mouseDown = function() {}, // function(elt, d) {}
 			rangeWidget = null,
-			xDomain = null; // set this to positions [start, end] into the data, to restrict the x domain
+			xDomain = null, // set this to positions [start, end] into the data, to restrict the x domain
+			tip = null;
 
 		var hadXAxis = false;
 
@@ -84,36 +86,37 @@ var d3 = (function (d3, _) {
 				var subdata = data.slice(xDomain[0], xDomain[1]+1);
 				function getDataLine(x) {
 					var matches = _.filter(subdata, function(d) { return d[0]===x});
-					if (matches.length!==1) { throw "cannot find "+x+" in data"; } // shouldn't happen
+					if (matches.length!==1) { throw "cannot find " + x + " in data"; } // shouldn't happen
 					return matches[0];
 				}
 				// Update the x-scale.
 				xScale.rangeBands([0, width - margin.left - margin.right], xPadding)
 					.domain(_.map(subdata, function(d) {return d[0]}));
-				
+
 				// Update the y-scale.
 				// Note d3.functor allows for constants or functions
 				//  - see https://github.com/mbostock/d3/wiki/Internals#functor
 				yScale
 					.domain([d3.functor(yMin)(subdata), d3.functor(yMax)(subdata)])
 					.range([(heightWithoutRange - margin.top - margin.bottom), 0]);
-				
+
 				// Select the svg element, if it exists.
-				var svg = d3.select(elt).selectAll("svg."+svgClass).data([1]);
+				var svg = d3.select(elt).selectAll("svg." + svgClass).data([1]);
 
 				// Otherwise, create the svg and the g.
-				var gEnter = svg.enter().append("svg").attr("class",svgClass).append("g");
+				var gEnter = svg.enter().append("svg").attr("class", svgClass).append("g");
 				gEnter.append("g").attr("class", "bars");
 				gEnter.append("g").attr("class", "x axis");
 				gEnter.append("g").attr("class", "y axis");
-
 				// Update the inner dimensions.
 				var g = svg.select("g")
-							.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-				
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 				var bars = g.select("g.bars").selectAll("rect.bar")
 					.data(subdata, function(d) {return d[0]});
-				
+				if(tip)
+					g.select("g.bars").call(tip)
+
 				// ENTER
 				bars.enter().append("rect")
 					.attr("class", "bar")
@@ -122,8 +125,9 @@ var d3 = (function (d3, _) {
 					.attr("height", 0 )
 					.attr("width", xScale.rangeBand())
 					.attr("fill", fill)
-					.attr("stroke", stroke);
-				
+					.attr("stroke", stroke)
+					.attr('selected', function(d, i){ return '0';});
+
 				// UPDATE
 				bars.on("mouseover", function(d) { mouseOver(this, d) }) // put these on the update in case they have changed
 					.on("mouseout", function(d) { mouseOut(this, d) })
@@ -143,9 +147,9 @@ var d3 = (function (d3, _) {
 					.attr("y", yScale(0) )
 					.attr("height", 0 )
 					.remove();
-				
+
 				// Update the outer dimensions.
-				svg .attr("width", width)
+				svg.attr("width", width)
 					.attr("height", heightWithoutRange);
 
 				if (xAxis && xScale.rangeBand()>=xAxisIfBarsWiderThan) {
@@ -164,23 +168,25 @@ var d3 = (function (d3, _) {
 							.duration(duration)
 								.attr("transform", "translate(0," + yScale(d3.functor(yValueOfXAxis)(data)) + ")")
 								.call(xAxis)
-					 				.selectAll("text")
+									.selectAll("text")
 									.call(xAxisText);
 					} else {
 						// this approach immediately presents the x-axis
-						g.select(".x.axis")
-							.call(xAxis)
-								.attr("transform", "translate(0," + yScale(d3.functor(yValueOfXAxis)(data)) + ")")
-								.transition()
-								.duration(duration)
-						 				.selectAll("text")
-										.call(xAxisText);
-					}
-					g.select(".x.axis")
-		 				.selectAll("text")
-							.on("mouseover", function(x) { mouseOver(this, getDataLine(x)) })
-							.on("mouseout", function(x) { mouseOut(this, getDataLine(x)) })
+						var xaxisImmediate = g.select(".x.axis")
+							.call(xAxis);
+
+						xaxisImmediate.attr("transform", "translate(0," + yScale(d3.functor(yValueOfXAxis)(data)) + ")")
+							.transition()
+							.duration(duration)
+							.selectAll("text")
 							.call(xAxisText);
+					}
+					
+					//g.select(".x.axis")
+					//	.selectAll("text")
+							//.on("mouseover", function(x) { mouseOver(this, getDataLine(x)) })
+							//.on("mouseout", function(x) { mouseOut(this, getDataLine(x)) })
+					//		.call(xAxisText)
 					hadXAxis = true;
 				} else if (hadXAxis) {
 					g.select(".x.axis").selectAll(".tick").remove();
@@ -191,17 +197,21 @@ var d3 = (function (d3, _) {
 					// Update the y-axis. Note if you turn the yAxis on/off dynamically it won't pick up the change
 					var dataMin = d3.min(subdata, function(d) {return d[1]}),
 						dataMax = d3.max(subdata, function(d) {return d[1]});
-					var tickValues = [0];
-					if (yScale(dataMin)-yScale(0)>yNoOverlap) {tickValues.push(dataMin); } // only if it won't overlap 0
+
+					var tickValues = [0, dataMax/4, dataMax/2, dataMax*(3/4)];
+					if (yScale(dataMin)-yScale(0) > yNoOverlap) {tickValues.push(dataMin); } // only if it won't overlap 0
 					else if (dataMin<0) {tickValues.push(yScale.invert(yScale(0)+yNoOverlap))} // if neg data but min near 0, show domain limit
-					if (yScale(dataMax)-yScale(0)<-yNoOverlap) {tickValues.push(dataMax); }
+
+					if (yScale(dataMax)-yScale(0) < -yNoOverlap) {tickValues.push(dataMax); }
 					else if (dataMax>0) {tickValues.push(yScale.invert(yScale(0)-yNoOverlap))} // if pos data but max near 0, show domain limit
+
 					yAxis.scale(yScale).tickValues(tickValues);
+
 					g.select(".y.axis")
-							.transition()
-							.duration(duration)
-							//.attr("transform", "translate(0," + yScale(0) + ")")
-							.call(yAxis);
+						.transition()
+						.duration(duration)
+						//.attr("transform", "translate(0," + yScale(0) + ")")
+						.call(yAxis);
 				}
 			}
 
@@ -222,10 +232,10 @@ var d3 = (function (d3, _) {
 						duration = oldDur;
 					});
 					d3.select(elt).datum([{
-							scale: d3.scale.linear().domain([0,data.length-1]),
-							start: xDomain ? xDomain[0] : 0, 
-							end: xDomain ? xDomain[1] : data.length-1
-						}]).call(rangeWidget);
+						scale: d3.scale.linear().domain([0, data.length-1]),
+						start: xDomain ? xDomain[0] : 0, 
+						end: xDomain ? xDomain[1] : data.length-1
+					}]).call(rangeWidget);
 				}
 			});
 		}
@@ -381,6 +391,12 @@ var d3 = (function (d3, _) {
 		chart.svgClass = function(_) {
 			if (!arguments.length) return svgClass;
 			svgClass = _;
+			return chart;
+		};
+
+		chart.attachTip = function(_) {
+			if (!arguments.length) return attachTip;
+			tip = _;
 			return chart;
 		};
 

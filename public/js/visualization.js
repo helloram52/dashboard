@@ -68,8 +68,8 @@ var Visualization = function() {
 
 	this.showBarChart =function(barChartData) {
 		if(barChartData != undefined && barChartData.length != 0){
-			$('#bar-div').html('');
-			this.drawBarChart(barChartData, '#bar-div');
+			$('#barcanvas-div').html('');
+			this.drawBarChart(barChartData, '#barcanvas-div', 350);
 		}
 		else {
 			Log('no data for bar chart');
@@ -80,7 +80,7 @@ var Visualization = function() {
 		if(pieChartData != undefined && pieChartData.length != 0) {
 			$('#pie-div').html('');
 			Log('drawing pie chart');
-			this.drawPieChart("Revenue", pieChartData, '#pie-div', "colorScale20", 10, 145, 5, 0);
+			this.drawPieChart("Revenue", pieChartData, '#pie-div', 300, "colorScale20", 10, 100, 5, 0);
 		}
 		else {
 			Log('no data to draw pie chart');
@@ -139,6 +139,7 @@ var Visualization = function() {
 		else if(fromChartType == 'BAR') {
 			args['YEAR'] = this.years;
 			args['MONTH'] = this.months;
+			args['BUSINESSUNIT'] = this.businessUnits;
 
 			var chartData = this.getData(args);
 			Log('updating bubble charts');
@@ -217,34 +218,26 @@ var Visualization = function() {
 
 											if(country != 'TOTAL'){
 												
-												for(var prodMix in customers[customer][country]){
+												for(var prodMix in customers[customer][country]) {
 
-													if(countryJSON.hasOwnProperty(country)){
+													if(countryJSON.hasOwnProperty(country)) {
 
-														if(countryJSON[country].hasOwnProperty(selectedBusUnit)) {
-															
-															revenueByProdMix = customers[customer][country][prodMix];
+														revenueByProdMix = customers[customer][country][prodMix];
 
-															if(countryJSON[country][selectedBusUnit].hasOwnProperty(prodMix)){
+														if(countryJSON[country].hasOwnProperty(prodMix)){
 
-																revenueByProdMix += countryJSON[country][selectedBusUnit][prodMix];
-																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
+															revenueByProdMix += countryJSON[country][prodMix];
+															countryJSON[country][prodMix] = revenueByProdMix;
 
-															}
-															else {
-																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
-															}
 														}
 														else {
-															countryJSON[country][selectedBusUnit] = {};
-															countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];	
+															countryJSON[country][prodMix] = revenueByProdMix;
 														}
 													}
 													else{
 
 														countryJSON[country] = {};
-														countryJSON[country][selectedBusUnit] = {};
-														countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];
+														countryJSON[country][prodMix] = customers[customer][country][prodMix];
 													}
 												}
 											}
@@ -283,8 +276,8 @@ var Visualization = function() {
 								revenueByBusinessUnit += inputData[selectedBusUnit][selectedYear][selectedMonth]['TOTAL'];
 								var customers = inputData[selectedBusUnit][selectedYear][selectedMonth];
 
-								for(var customerPos in selectedCustomers){
-									
+								for(var customerPos in selectedCustomers) {
+
 									var customer = selectedCustomers[customerPos];
 									//gather data for bar chart
 									//check whether customer property is present for this object
@@ -303,35 +296,25 @@ var Visualization = function() {
 										for(var country in customers[customer]){
 
 											if(country != 'TOTAL'){
-												
+
 												for(var prodMix in customers[customer][country]){
 
-													if(countryJSON.hasOwnProperty(country)){
-
-														if(countryJSON[country].hasOwnProperty(selectedBusUnit)) {
-															
+													if(countryJSON.hasOwnProperty(country)) {
 															revenueByProdMix = customers[customer][country][prodMix];
 
-															if(countryJSON[country][selectedBusUnit].hasOwnProperty(prodMix)){
+															if(countryJSON[country].hasOwnProperty(prodMix)){
 
-																revenueByProdMix += countryJSON[country][selectedBusUnit][prodMix];
-																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
+																revenueByProdMix += countryJSON[country][prodMix];
+																countryJSON[country][prodMix] = revenueByProdMix;
 
 															}
 															else {
-																countryJSON[country][selectedBusUnit][prodMix] = revenueByProdMix;
+																countryJSON[country][prodMix] = revenueByProdMix;
 															}
-														}
-														else {
-															countryJSON[country][selectedBusUnit] = {};
-															countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];	
-														}
 													}
-													else{
-
+													else {
 														countryJSON[country] = {};
-														countryJSON[country][selectedBusUnit] = {};
-														countryJSON[country][selectedBusUnit][prodMix] = customers[customer][country][prodMix];
+														countryJSON[country][prodMix] = customers[customer][country][prodMix];
 													}
 												}
 											}
@@ -352,7 +335,7 @@ var Visualization = function() {
 		}
 
 		//populate data for bar chart
-		for(customer in customerJSON){
+		for(customer in customerJSON) {
 			var barChartData = {};
 			barChartData['label'] = customer;
 			barChartData['data'] = customerJSON[customer];
@@ -362,7 +345,7 @@ var Visualization = function() {
 		//populate data for bubble chart
 
 		/*{
-			"Name" 		: busUnit,
+			"Name" 		: country,
 			"children"	: [
 				{"Name": <prodMix>, "size": <revenue>},
 				{"Name": <prodMix>, "size": <revenue>}
@@ -377,31 +360,20 @@ var Visualization = function() {
 		};
 
 		var countryIndex = 0;
-		for(country in countryJSON) {	
+		for(country in countryJSON) {
 
 			var bubbleChart = {};
 			bubbleChart['name'] = country;
 			bubbleChart['children'] =[];
 
-			var busUnitIndex = 0;
-			for(var busUnit in countryJSON[country]) {
+			var prodIndex = 0;
+			for(var prodMix in countryJSON[country]) {
 
-				bubbleChart['children'][busUnitIndex] ={};
-				bubbleChart['children'][busUnitIndex]['name'] = busUnit;
-				bubbleChart['children'][busUnitIndex]['children'] = [];
-
-				var prodIndex = 0;
-				for(var prodMix in countryJSON[country][busUnit]) {
-
-					bubbleChart['children'][busUnitIndex]['children'][prodIndex] ={};
-					bubbleChart['children'][busUnitIndex]['children'][prodIndex]['name'] = prodMix;				
-					bubbleChart['children'][busUnitIndex]['children'][prodIndex]['size'] = countryJSON[country][busUnit][prodMix];				
-					prodIndex++;
-				}
-				
-				busUnitIndex++;
+				bubbleChart['children'][prodIndex] ={};
+				bubbleChart['children'][prodIndex]['name'] = prodMix;
+				bubbleChart['children'][prodIndex]['size'] = countryJSON[country][prodMix];
+				prodIndex++;
 			}
-
 			bubbleChartArray[countryIndex++] = bubbleChart;
 		}
 
@@ -454,7 +426,7 @@ var Visualization = function() {
 	// sortArcs => Controls sorting of Arcs by value.
 	//              0 = No Sort.  Maintain original order.
 	//              1 = Sort by arc value size.
-	this.drawPieChart = function(pieName, dataset, selectString, colors, margin, outerRadius, innerRadius, sortArcs) {
+	this.drawPieChart = function(pieName, dataset, selectString, canvasWidth, colors, margin, outerRadius, innerRadius, sortArcs) {
 		// Color Scale Handling...
 		var colorScale = d3.scale.category20c();
 		switch (colors) {
@@ -474,7 +446,6 @@ var Visualization = function() {
 				colorScale = d3.scale.category20c();
 		};
 
-		var canvasWidth = 700;
 		var pieWidthTotal = outerRadius * 2;
 		var pieCenterX = outerRadius + margin/2;
 		var pieCenterY = outerRadius + margin/2;
@@ -575,7 +546,7 @@ var Visualization = function() {
 			.attr("height", canvasHeight) //set the height of the canvas
 			.append("svg:g") //make a group to hold our pie chart
 			.attr("transform", "translate(" + pieCenterX + "," + pieCenterY + ")") // Set center of pie
-			.call(tip); //attach tip to canvas div
+			.call(tip); //attach tip to svg group
 
 		// Define an arc generator. This will create <path> elements for using arc data.
 		var arc = d3.svg.arc()
@@ -701,18 +672,21 @@ var Visualization = function() {
 		}
 	},
 
-	this.drawBarChart = function(dataset, selectString) {
+	this.drawBarChart = function(dataset, selectString, width) {
 		var elt = d3.select(selectString);
-			var width = 720, 
-				height = 400;
-			var stockData = null,
-				yMax;
-			var totalRevenue = d3.sum(dataset.map(function(d) {
-				return d.data;
-			}));
+		var height = 400;
+		var stockData = null,
+			yMax;
+		var totalRevenue = d3.sum(dataset.map(function(d) {
+			return d.data;
+		}));
 
-		var mouseDownEventHandler = function(el, data) {
-			var currentBar = d3.select(this);
+		var tip = d3.tip()
+			.attr('class', 'd3-tip')
+			.offset([0, 0]);
+
+		var mouseDownEventHandler = function(element, data) {
+			var currentBar = d3.select(element);
 			// First time selected, push it to our list of stored customer units
 			// , mark it selected by coloring it in Maroon and then update the bar chart.
 			if(currentBar.attr('selected') == '0') {
@@ -739,48 +713,75 @@ var Visualization = function() {
 			}
 		};
 
-		function showHover(el, d) {
+		function showHover(element, d) {
 			var percent = 0;
 			percent = Math.round(1000 * d[1] / totalRevenue) / 10;
 
-			var currentBar = d3.select(this);
+			var currentBar = d3.select(element);
 			currentBar.style('fill', 'maroon');
 
+			var tooltipHTML = "<table class='pie-tooltip'>"
+				+ "<tbody>"
+					+ "<tr>"
+						+ "<th colspan=2>" + d[0] + "</th>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>"
+							+ percent + "%"
+						+ "</td>"
+						+ "<td class='value'> $" + formatCurrency(d[1], 1, 'M') + "</td>"
+					+ "</tr>"
+				+ "</tbody>"
+			+ "</table>";
+
+			//display percent value in tool tip for the seleceted arc
+			tip.html(tooltipHTML);
+			tip.show();
+
+/*
 			var hoverDiv = d3.selectAll("#hover");
 			var html = '<h2>' + d[0] + '</h2>';
 			html += '<div class="key-value"><div class="value">' + percent + '%</div><div class="key">Revenue Percentage</div></div>';
 			html += '<div class="key-value"><div class="value">' + d3.format("$,.3r")(+d[1]) + "m" + '</div><div class="key"> Revenue </div></div>';
 			hoverDiv.html(html);
 			hoverDiv.style("opacity", 1);
+*/
 		}
 
-		function hideHover(el, d) {
-			var currentBar = d3.select(this);
+		function hideHover(element, d) {
+			var currentBar = d3.select(element);
 			// If this isn't selected by mouse, restore the original color
 			if(currentBar.attr('selected') == '0')
 				currentBar.style("fill", 'steelblue');
-
+/*
 			var hoverDiv = d3.selectAll("#hover");
 			hoverDiv.style("opacity", 1e-6);
+*/
+			tip.hide();
 		}
-		var rangeWidget = d3.elts.startEndSlider().minRange(30);
-		var milDol = function(v) { return d3.format("$,.0f")(v)+"m"};
+
+		var rangeWidget = d3.elts.startEndSlider().minRange(1000);//.scale;
+		//d3.select('body').datum([{start: new Date("2001-01-01"), end: new Date("2002-01-01")}]).call(mySlider);
+		var milDol = function(v) { return d3.format("$,.0f")(v) + 'm'};
 		var myChart = d3.elts.barChart()
 			.width(width)
 			.height(height)
 			.yMin(0)
 			.rangeWidget(rangeWidget)
 			.yAxis(d3.svg.axis().orient("left").tickSize(6, 0).tickFormat(milDol))
-			.xDomain([0, 30])
+			.xDomain([0, 10]) // Controls the number of bars that appear in the chart at any time(slider should be used to see the further ones)
 			.xAxisIfBarsWiderThan(11)
-			//.xAxisAnimate(false)
+			.xAxisAnimate(false)
 			.mouseOver(function(el, d) { showHover(el, d) })
 			.mouseOut(function(el, d) { hideHover(el, d) })
 			.mouseDown(function(el, d) { mouseDownEventHandler(el, d) })
-			.margin({top: 40, right: 20, bottom: 60, left: 100});
+			.margin({top: 40, right: 20, bottom: 60, left: 100})
+			.attachTip(tip);
+		// Add d3-tip
+		//myChart.tip = tip;
 
 		redraw = function(sortCol) {
-			stockData = _.sortBy(stockData, function(d) { if (sortCol===1) return -d[1]; else return d[0]; });
+			stockData = _.sortBy(stockData, function(d) { if (sortCol === 1) return -d[1]; else return d[0]; });
 			myChart.yMax(function(data) {
 				var high = d3.max(data, function(d) {return d[1]}); 
 				return high; // scales up small values, but not to the top
