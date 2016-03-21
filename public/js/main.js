@@ -40,6 +40,17 @@ var qtrIDToMonthsIDMap = {
 
 // Keep track of the most recent year to reset.
 var mostRecentYear;
+var ctrlKeyPressed = false;
+
+$(document).on('keydown', function() {
+	if(event.which == '17') {
+		ctrlKeyPressed = true;
+	}
+})
+
+$(document).on('keyup', function() {
+	ctrlKeyPressed = false;
+})
 
 $(document).ready(function() {
 	// Get the most recent year
@@ -65,6 +76,31 @@ $(document).ready(function() {
 		$(this).delay(100).queue(updateYearQtrMonthButtons);
 	});
 
+	// Replace context menu pop ups on ctrl + click with the invert selection i.e.
+	// if July month is ctrl clicked, only July should appear selected and the rest
+	// of the months should be inactive.
+	// note: this works only if 
+	$('.month-group .btn').on('contextmenu', function() {
+		var self = $(this);
+		var checkbox = self.find(':checkbox');
+
+		self.parent().children().each(function(i) {
+			// If this is the current button, set it active. Otherwise, unset.
+			if($(this).is(self)) {
+				if(!$(this).hasClass('active'))
+					$(this).addClass('active');
+				return;
+			}
+			if($(this).hasClass("active") ) {
+				$(this).removeClass("active");
+			}
+		});
+
+		// As we invert the selections, set all the quarters inactive.
+		setAllQtrInactive();
+		gatherMonthYearsDataAndUpdateVisualization();
+		return false;
+	})
 	// Handle Qtr/Year/Month checkbox clicks
 	// In Qtr and Year groups, ALL checkbox and the rest of the buttons are mutually exclusive
 	// i.e If a QTR-1 checkbox is selected, ALL shouldn't appear selected.
@@ -286,11 +322,24 @@ function preserveQuarterValidity(selectedQuarters) {
 	}
 }
 
-function setAllQtrActive() {
+// Sets all the qtr buttons inactive including ALL.
+function setAllQtrInactive() {
+	var allParentDiv = $('#qtr-all').parent();
+	if(allParentDiv.hasClass('active'))
+		allParentDiv.removeClass('active');
+
+	uncheckNonAllQTRButtons();
+}
+
+// Sets all the qtr buttons active including ALL.
+// Also updates the respective months if dontUdateMonthsFlag isn't set
+function setAllQtrActive(dontUpdateMonthsFlag) {
 	var allParentDiv = $('#qtr-all').parent();
 	if(!allParentDiv.hasClass('active'))
 		allParentDiv.addClass('active');
-	updateMonths('qtr-all', true);
+
+	if(!dontUpdateMonthsFlag)
+		updateMonths('qtr-all', true);
 	uncheckNonAllQTRButtons();
 }
 
@@ -306,6 +355,7 @@ function preserveMonthValidity() {
 		return;
 	}
 
+	var allQuartersActive = true;
 	$.each(['qtr1', 'qtr2', 'qtr3', 'qtr4'], function(index, quarter) {
 		var allMonthsInQtrActive = true;
 
@@ -318,12 +368,20 @@ function preserveMonthValidity() {
 			}
 		}
 
+		// Clear the all quarters active flag if at least one quarter can't be set to active.
+		if(!allMonthsInQtrActive)
+			allQuartersActive = false;
+
 		var labelDiv = $('#' + quarter).parent();
 		if(!labelDiv.hasClass('active') && allMonthsInQtrActive) {
 			labelDiv.addClass('active');
 		}
-			
-	})
+	});
+
+	// If all the the four quarters were set to active, unset them and mark the ALL button as active
+	if(allQuartersActive) {
+		setAllQtrActive(true);
+	}
 }
 
 /*

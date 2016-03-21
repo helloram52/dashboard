@@ -777,8 +777,6 @@ var Visualization = function() {
 			.mouseDown(function(el, d) { mouseDownEventHandler(el, d) })
 			.margin({top: 40, right: 20, bottom: 60, left: 100})
 			.attachTip(tip);
-		// Add d3-tip
-		//myChart.tip = tip;
 
 		redraw = function(sortCol) {
 			stockData = _.sortBy(stockData, function(d) { if (sortCol === 1) return -d[1]; else return d[0]; });
