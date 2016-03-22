@@ -69,7 +69,7 @@ var Visualization = function() {
 	this.showBarChart =function(barChartData) {
 		if(barChartData != undefined && barChartData.length != 0){
 			$('#barcanvas-div').html('');
-			this.drawBarChart(barChartData, '#barcanvas-div', 400);
+			this.drawBarChart(barChartData, '#barcanvas-div', 350, 350);
 		}
 		else {
 			Log('no data for bar chart');
@@ -80,7 +80,7 @@ var Visualization = function() {
 		if(pieChartData != undefined && pieChartData.length != 0) {
 			$('#pie-div').html('');
 			Log('drawing pie chart');
-			this.drawPieChart("Revenue", pieChartData, '#pie-div', 300, "colorScale20", 10, 100, 5, 0);
+			this.drawPieChart("Revenue", pieChartData, '#pie-div', 300, "colorScale20", 10, 120, 5, 0);
 		}
 		else {
 			Log('no data to draw pie chart');
@@ -672,9 +672,8 @@ var Visualization = function() {
 		}
 	},
 
-	this.drawBarChart = function(dataset, selectString, width) {
+	this.drawBarChart = function(dataset, selectString, width, height) {
 		var elt = d3.select(selectString);
-		var height = 400;
 		var stockData = null,
 			yMax;
 		var totalRevenue = d3.sum(dataset.map(function(d) {
@@ -712,8 +711,15 @@ var Visualization = function() {
 				}, 'BAR');
 			}
 
-			// The current selection is returned so that we could render selected charts on
-			// 
+			var selectionsHTML = '';
+			for(var barSelections in parent.chartSelections.BARCHART) {
+				selectionsHTML += '| <strong>' + barSelections + '</strong> ';
+			}
+			if(selectionsHTML != '')
+				selectionsHTML += "|";
+			$('#bar-div > #barselection-div').html(selectionsHTML);
+
+			// The current selection is returned so that we could render selected charts on them
 			return Object.keys(parent.chartSelections.BARCHART);
 		};
 
@@ -773,12 +779,12 @@ var Visualization = function() {
 			.yMin(0)
 			.rangeWidget(rangeWidget)
 			.yAxis(d3.svg.axis().orient("left").tickSize(6, 0).tickFormat(milDol))
-			.xDomain([0, 14]) // Controls the number of bars that appear in the chart at any time(slider should be used to see the further ones)
+			.xDomain([0, 13]) // Controls the number of bars that appear in the chart at any time(slider should be used to see the further ones)
 			.xAxisIfBarsWiderThan(11)
 			.xAxisAnimate(false)
 			.mouseOver(function(el, d) { showHover(el, d) })
 			.mouseOut(function(el, d) { hideHover(el, d) })
-			.mouseDown(function(el, d) { Log('viz.js before returning..');return mouseDownEventHandler(el, d); })
+			.mouseDown(function(el, d) { return mouseDownEventHandler(el, d); })
 			.margin({top: 40, right: 20, bottom: 60, left: 100})
 			.attachTip(tip);
 
@@ -1036,5 +1042,3 @@ var Visualization = function() {
 
 	}
 };
-
-
