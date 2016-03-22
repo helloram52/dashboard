@@ -772,7 +772,7 @@ var Visualization = function() {
 
 		var rangeWidget = d3.elts.startEndSlider().minRange(1000);//.scale;
 		//d3.select('body').datum([{start: new Date("2001-01-01"), end: new Date("2002-01-01")}]).call(mySlider);
-		var milDol = function(v) { return d3.format("$,.0f")(v) + 'm'};
+		var milDol = function(v) { return d3.format("$,.0f")(v)};
 		var myChart = d3.elts.barChart()
 			.width(width)
 			.height(height)
