@@ -73,7 +73,7 @@ var Visualization = function() {
 			$('#barcanvas-div').html('');
 			$('#bar-div > #barselection-div').html('');
 			parent.chartSelections.BARCHART = {};
-			this.drawBarChart(barChartData, '#barcanvas-div', 350, 350);
+			this.drawBarChart(barChartData, '#barcanvas-div', 400, 350);
 		}
 		else {
 			Log('no data for bar chart');
