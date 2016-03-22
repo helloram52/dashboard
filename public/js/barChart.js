@@ -54,7 +54,6 @@ var d3 = (function (d3, _) {
 					d3.select(this).style('fill', 'maroon');
 					return 'maroon';
 				}
-
 				return "steelblue";
 			},
 			stroke = function(d) { return "#fff";},

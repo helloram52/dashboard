@@ -69,7 +69,7 @@ var Visualization = function() {
 	this.showBarChart =function(barChartData) {
 		if(barChartData != undefined && barChartData.length != 0){
 			$('#barcanvas-div').html('');
-			this.drawBarChart(barChartData, '#barcanvas-div', 350);
+			this.drawBarChart(barChartData, '#barcanvas-div', 400);
 		}
 		else {
 			Log('no data for bar chart');
@@ -773,7 +773,7 @@ var Visualization = function() {
 			.yMin(0)
 			.rangeWidget(rangeWidget)
 			.yAxis(d3.svg.axis().orient("left").tickSize(6, 0).tickFormat(milDol))
-			.xDomain([0, 10]) // Controls the number of bars that appear in the chart at any time(slider should be used to see the further ones)
+			.xDomain([0, 14]) // Controls the number of bars that appear in the chart at any time(slider should be used to see the further ones)
 			.xAxisIfBarsWiderThan(11)
 			.xAxisAnimate(false)
 			.mouseOver(function(el, d) { showHover(el, d) })
