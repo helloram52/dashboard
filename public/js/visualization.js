@@ -59,6 +59,7 @@ var Visualization = function() {
 	this.showBubbleChart =function(bubbleChartData) {
 		if(bubbleChartData != undefined && bubbleChartData.length != 0){
 			$('#bubble-div').html('');
+			parent.chartSelections.BUBBLECHART = {};
 			this.drawBubbleChart(bubbleChartData, '#bubble-div');
 		}
 		else {
@@ -67,8 +68,11 @@ var Visualization = function() {
 	},
 
 	this.showBarChart =function(barChartData) {
-		if(barChartData != undefined && barChartData.length != 0){
+		if(barChartData != undefined && barChartData.length != 0) {
+			// Clear the previous bar chart and the div that stores the selections made in them.
 			$('#barcanvas-div').html('');
+			$('#bar-div > #barselection-div').html('');
+			parent.chartSelections.BARCHART = {};
 			this.drawBarChart(barChartData, '#barcanvas-div', 350, 350);
 		}
 		else {
@@ -80,6 +84,7 @@ var Visualization = function() {
 		if(pieChartData != undefined && pieChartData.length != 0) {
 			$('#pie-div').html('');
 			Log('drawing pie chart');
+			parent.chartSelections.PIECHART = {};
 			this.drawPieChart("Revenue", pieChartData, '#pie-div', 300, "colorScale20", 10, 120, 5, 0);
 		}
 		else {
