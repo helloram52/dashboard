@@ -27,6 +27,7 @@
 var Visualization = function() {
 	this.canvasSelectorString = '';
 	this.businessUnits = [];
+	this.bubbleChartData = {};
 	this.jsonObject = {};
 
 	var superParent = this;
@@ -77,7 +78,22 @@ var Visualization = function() {
 		if(bubbleChartData != undefined && bubbleChartData.length != 0){
 			$('#bubble-div').html('');
 			superParent.chartSelections.BUBBLES = {};
-			this.drawBubbles(bubbleChartData, '#bubble-div', 1000, 400);
+			this.bubbleChartData = bubbleChartData;
+			this.drawBubbles(bubbleChartData, '#bubble-div', 1000, 400, 'product', 'revenue');
+		}
+		else {
+			Log('no data for bubble chart');
+		}
+	},
+
+	this.reloadBubbleChart =function(groupBy, sizeBy) {
+		
+		var bubbleChartData = this.bubbleChartData;
+
+		if(bubbleChartData != undefined && bubbleChartData.length != 0){
+			$('#bubble-div').html('');
+			superParent.chartSelections.BUBBLES = {};
+			this.drawBubbles(bubbleChartData, '#bubble-div', 1000, 400, groupBy, sizeBy);
 		}
 		else {
 			Log('no data for bubble chart');
@@ -183,10 +199,8 @@ var Visualization = function() {
 			args['BUSINESSUNIT'] = this.businessUnits;
 			args['CUSTOMER'] = this.customers;
 
-			Log(args['COUNTRY']);
 			var chartData = this.getData(args);
 			Log('updating bubbles');
-			this.showCirclePackChart(chartData['BUBBLECHART']);
 			this.showBubbleChart(chartData['BUBBLES']);
 		}
 	},
@@ -268,28 +282,49 @@ var Visualization = function() {
 													for(var prodMix in customers[customer][country]) {
 
 														var tempList = _.values(customers[customer][country][prodMix]);
-														revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d; }, 0);
+														revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d['revenue']; }, 0);
 														
 														
 														if(productJSON.hasOwnProperty(prodMix)){
+															
 															for(var product in customers[customer][country][prodMix]) {
 																
 																if(productJSON[prodMix].hasOwnProperty(product)){
-																	var revenueByProduct = customers[customer][country][prodMix][product];
-																	revenueByProduct += productJSON[prodMix][product];
-																	productJSON[prodMix][product] = revenueByProduct;
+
+																	var revenueByProduct = customers[customer][country][prodMix][product]['revenue'];
+																	var nrev = revenueByProduct;
+																	var prev = productJSON[prodMix][product]['revenue']
+																	revenueByProduct += productJSON[prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['revenue'] = revenueByProduct;
+
+																	var volumeByProduct = customers[customer][country][prodMix][product]['volume'];
+																	volumeByProduct += productJSON[prodMix][product]['volume'];
+																	productJSON[prodMix][product]['volume'] = volumeByProduct;
+
+																	var costByProduct = customers[customer][country][prodMix][product]['cost'];
+																	costByProduct += productJSON[prodMix][product]['cost'];
+																	productJSON[prodMix][product]['cost'] = costByProduct;
+																
 																}
 																else{
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																	
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
+
 																}
 															}
 														}
 														else{
 															productJSON[prodMix] = {};
 															for(var product in customers[customer][country][prodMix]) {
-																
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
-																	//Log("in else->revenue=> product="+product+"==="+customers[customer][country][prodMix][product]);
+
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
+																	
 															}
 														}
 
@@ -302,6 +337,7 @@ var Visualization = function() {
 
 															}
 															else {
+
 																countryJSON[country][prodMix] = revenueByProdMix;
 															}
 														}
@@ -323,27 +359,44 @@ var Visualization = function() {
 													for(var prodMix in customers[customer][country]) {
 
 														var tempList = _.values(customers[customer][country][prodMix]);
-														revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d; }, 0);
+														revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d['revenue']; }, 0);
 														
 														
 														if(productJSON.hasOwnProperty(prodMix)){
+															
 															for(var product in customers[customer][country][prodMix]) {
 																
 																if(productJSON[prodMix].hasOwnProperty(product)){
-																	var revenueByProduct = customers[customer][country][prodMix][product];
-																	revenueByProduct += productJSON[prodMix][product];
-																	productJSON[prodMix][product] = revenueByProduct;
+
+																	var revenueByProduct = customers[customer][country][prodMix][product]['revenue'];
+																	revenueByProduct += productJSON[prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['revenue'] = revenueByProduct;
+
+																	var volumeByProduct = customers[customer][country][prodMix][product]['volume'];
+																	volumeByProduct += productJSON[prodMix][product]['volume'];
+																	productJSON[prodMix][product]['volume'] = volumeByProduct;
+
+																	var costByProduct = customers[customer][country][prodMix][product]['cost'];
+																	costByProduct += productJSON[prodMix][product]['cost'];
+																	productJSON[prodMix][product]['cost'] = costByProduct;
+																
 																}
 																else{
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
 																}
 															}
 														}
 														else{
 															productJSON[prodMix] = {};
 															for(var product in customers[customer][country][prodMix]) {
-																
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																	
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
 																	//Log("in else->revenue=> product="+product+"==="+customers[customer][country][prodMix][product]);
 															}
 														}
@@ -427,47 +480,64 @@ var Visualization = function() {
 
 												if(country != 'TOTAL'){
 
-													for(var prodMix in customers[customer][country]){
+													for(var prodMix in customers[customer][country]) {
 
 														var tempList = _.values(customers[customer][country][prodMix]);
-														revenueByProdMix = _.reduce(tempList, function( memo , d){ return memo+d; }, 0);
-
+														revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d['revenue']; }, 0);
+														
+														
 														if(productJSON.hasOwnProperty(prodMix)){
+															
 															for(var product in customers[customer][country][prodMix]) {
 																
 																if(productJSON[prodMix].hasOwnProperty(product)){
-																	var revenueByProduct = customers[customer][country][prodMix][product];
-																	revenueByProduct += productJSON[prodMix][product];
-																	productJSON[prodMix][product] = revenueByProduct;
+
+																	var revenueByProduct = customers[customer][country][prodMix][product]['revenue'];
+																	revenueByProduct += productJSON[prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['revenue'] = revenueByProduct;
+
+																	var volumeByProduct = customers[customer][country][prodMix][product]['volume'];
+																	volumeByProduct += productJSON[prodMix][product]['volume'];
+																	productJSON[prodMix][product]['volume'] = volumeByProduct;
+
+																	costByProduct = customers[customer][country][prodMix][product]['cost'];
+																	costByProduct += productJSON[prodMix][product]['cost'];
+																	productJSON[prodMix][product]['cost'] = costByProduct;
+																
 																}
 																else{
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
 																}
 															}
 														}
 														else{
 															productJSON[prodMix] = {};
 															for(var product in customers[customer][country][prodMix]) {
-																
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																	
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
 															}
 														}
 
 														if(countryJSON.hasOwnProperty(country)) {
-																
-																//Log("BusinessUnit="+selectedBusUnit+" customer="+customer+" Country="+country+" prodMix="+prodMix+" sum="+revenueByProdMix);
-																
-																if(countryJSON[country].hasOwnProperty(prodMix)){
 
-																	revenueByProdMix += countryJSON[country][prodMix];
-																	countryJSON[country][prodMix] = revenueByProdMix;
+															if(countryJSON[country].hasOwnProperty(prodMix)){
 
-																}
-																else {
-																	countryJSON[country][prodMix] = revenueByProdMix;
-																}
+																revenueByProdMix += countryJSON[country][prodMix];
+																countryJSON[country][prodMix] = revenueByProdMix;
+
+															}
+															else {
+																countryJSON[country][prodMix] = revenueByProdMix;
+															}
 														}
-														else {
+														else{
+
 															countryJSON[country] = {};
 															countryJSON[country][prodMix] = revenueByProdMix;
 														}
@@ -484,27 +554,44 @@ var Visualization = function() {
 													for(var prodMix in customers[customer][country]) {
 
 														var tempList = _.values(customers[customer][country][prodMix]);
-														revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d; }, 0);
+														revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d['revenue']; }, 0);
 														
 														
 														if(productJSON.hasOwnProperty(prodMix)){
+															
 															for(var product in customers[customer][country][prodMix]) {
 																
 																if(productJSON[prodMix].hasOwnProperty(product)){
-																	var revenueByProduct = customers[customer][country][prodMix][product];
-																	revenueByProduct += productJSON[prodMix][product];
-																	productJSON[prodMix][product] = revenueByProduct;
+
+																	var revenueByProduct = customers[customer][country][prodMix][product]['revenue'];
+																	revenueByProduct += productJSON[prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['revenue'] = revenueByProduct;
+
+																	var volumeByProduct = customers[customer][country][prodMix][product]['volume'];
+																	volumeByProduct += productJSON[prodMix][product]['volume'];
+																	productJSON[prodMix][product]['volume'] = volumeByProduct;
+
+																	var costByProduct = customers[customer][country][prodMix][product]['cost'];
+																	costByProduct += productJSON[prodMix][product]['cost'];
+																	productJSON[prodMix][product]['cost'] = costByProduct;
+																
 																}
 																else{
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
 																}
 															}
 														}
 														else{
 															productJSON[prodMix] = {};
 															for(var product in customers[customer][country][prodMix]) {
-																
-																	productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																	
+																	productJSON[prodMix][product] = {};
+																	productJSON[prodMix][product]['revenue'] = customers[customer][country][prodMix][product]['revenue'];
+																	productJSON[prodMix][product]['volume'] = customers[customer][country][prodMix][product]['volume'];
+																	productJSON[prodMix][product]['cost'] = customers[customer][country][prodMix][product]['cost'];
 																	//Log("in else->revenue=> product="+product+"==="+customers[customer][country][prodMix][product]);
 															}
 														}
@@ -599,7 +686,9 @@ var Visualization = function() {
 				var productData = {};
 				productData['name'] = product;
 				productData['product'] = productMix;
-				productData['revenue'] = productJSON[productMix][product];
+				productData['revenue'] = productJSON[productMix][product]['revenue'];
+				productData['volume'] = productJSON[productMix][product]['volume'];
+				productData['cost'] = productJSON[productMix][product]['cost'];
 				productDataArray[productIndex++] = productData;
 			}
 		}
@@ -608,7 +697,6 @@ var Visualization = function() {
 		chartData['BARCHART'] = barChartDataArray;
 		chartData['BUBBLECHART'] = bubbleChartData;
 		productDataArray = getSortedJSON(productDataArray, 'product');
-		Log(productDataArray);
 		chartData['BUBBLES'] = productDataArray;
 
 		return chartData;
@@ -1079,12 +1167,8 @@ var Visualization = function() {
 				zoom(d); 
 				d3.event.stopPropagation();
 			}
-			else {
-
-				 //zoom(root);
-			}
-
 			})
+
 		.on("mouseover", function (d) { mouseOver(d); })
 		.on("mouseout", function (d) { tip.hide(); })
 		.attr('selected', function(d, i) { return '0';});
@@ -1092,14 +1176,17 @@ var Visualization = function() {
 
 		function mouseClick(element, d) {
 
+			tip.hide();
 			var currentCircle = d3.select(element);
 			// First time selected, push it to our list of stored countries
 			// , mark it selected by coloring it in Maroon and then update the bubbles.
+			Log("selected="+currentCircle.attr('selected'));
 			if(currentCircle.attr('selected') == '0') {
 				currentCircle.attr('selected', '1');
 				currentCircle.style("fill", "maroon");
 			
 				superParent.chartSelections.BUBBLECHART[ d.name ] = '1';
+
 				
 
 				superParent.updateView({
@@ -1110,25 +1197,16 @@ var Visualization = function() {
 			// and remove it from the stored list.
 			else {
 				currentCircle.attr('selected', '0');
+				Log("reset="+currentCircle.attr('selected'));
 				delete superParent.chartSelections.BUBBLECHART[ d.name ];
 
 				// this should reflect the color of the bar originally
-				// which is currently set to a constant in barchart.js
-				//currentCircle.style("fill", "steelblue");
+				// which is currently set to a constant in barchart.jsrgb(77, 194, 202)
+				currentCircle.style("fill", "rgb(77, 194, 202)");
 				superParent.updateView({
 					'COUNTRY' : Object.keys(superParent.chartSelections.BUBBLECHART),
 				}, 'CIRCLE');
 			}
-			/*var selectionsHTML = '';
-			for(var circleSelections in superParent.chartSelections.BUBBLECHART) {
-				selectionsHTML += '| <strong>' + barSelections + '</strong> ';
-			}
-			if(selectionsHTML != '')
-				selectionsHTML += "|";
-			$('#bar-div > #barselection-div').html(selectionsHTML);
-			*/
-			// The current selection is returned so that we could render selected charts on them
-			//return Object.keys(superParent.chartSelections.BUBBLECHART);
 		};
 
 		var text = svg.selectAll("text")
@@ -1202,7 +1280,7 @@ var Visualization = function() {
 		d3.select(self.frameElement).style("height", diameter + "px");
 	},
 
-	this.drawBubbles = function(data, division, width, height) { 
+	this.drawBubbles = function(data, division, width, height, groupBy, sizeBy) { 
 
 		var group = size = color = '';
 		var colors = {default: '#4CC1E9'};
@@ -1219,7 +1297,7 @@ var Visualization = function() {
 		    .attr("width", width)
 		    .attr("height", height).call(tip);
 
-		data = getDataMapping(data, 'revenue');
+		data = getDataMapping(data, sizeBy);
 
 		var padding = 5;
 		var maxRadius = d3.max(_.pluck(data, 'radius'));
@@ -1267,6 +1345,14 @@ var Visualization = function() {
 					+ "<tr>"
 						+ "<td>Revenue </td>"
 						+ "<td class='value'> $" + formatCurrency(d.revenue, 1, 'M') + "</td>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>Volume </td>"
+						+ "<td class='value'> " + d3.format(",.0f")(d.volume) + "</td>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>Cost </td>"
+						+ "<td class='value'> " + "$"+formatCurrency(d.cost, 1, 'M') + "</td>"
 					+ "</tr>"
 				+ "</tbody>"
 			+ "</table>";
@@ -1317,7 +1403,7 @@ var Visualization = function() {
 		var force = d3.layout.force();
 
 		//changeColor(color);
-		draw('product');
+		draw(groupBy);
 
 		function draw (varname) {
 		  var centers = getCenters(varname, [width, height]);
@@ -1377,6 +1463,10 @@ var Visualization = function() {
 					+ "<tr>"
 						+ "<td>Revenue </td>"
 						+ "<td class='value'> $" + formatCurrency(d.revenue, 1, 'M') + "</td>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>Volume </td>"
+						+ "<td class='value'> " + d3.format(",.0f")(d.volume); + "</td>"
 					+ "</tr>"
 				+ "</tbody>"
 			+ "</table>";

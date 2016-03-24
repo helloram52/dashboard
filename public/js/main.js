@@ -74,7 +74,17 @@ $(document).ready(function() {
 		// Queuing up the update event as the bug in bootstrap
 		// doesn't toggle the button's active class as soon as
 		// the click happens.
-		$(this).delay(100).queue(updateYearQtrMonthButtons);
+		var self = $(this);
+	
+		Log("inside btn-group handler=>"+self.parent().attr("class"));		
+		if(self.parent().hasClass('bubble-group')) { 
+
+			Log('Size by button clicked');
+			self.delay(100).queue(updateBubbleButtons);
+		}
+		else {
+			self.delay(100).queue(updateYearQtrMonthButtons);	
+		}
 	});
 
 	// Replace context menu pop ups on ctrl + click with the invert selection i.e.
@@ -209,6 +219,26 @@ $(document).ready(function() {
 		gatherMonthYearsDataAndUpdateVisualization();
 		$(this).dequeue();
 	};
+
+	var updateBubbleButtons = function() {
+		
+		Log("updateBubbleButtons: after selecting radio");
+		var self = $(this);
+		var radio = self.find(':radio');
+		// return if there isn't a radio within the btn-group.
+		// Unlikely to happen.
+		if(radio.length == 0)
+			return;
+
+		Log('radio Val='+radio.val());
+
+		//To do: if we have 'groupBy' feature, alter  this value
+		var groupBy = 'product';
+
+		chartVisualization.reloadBubbleChart( groupBy, radio.val() );
+		$(this).dequeue();
+	};
+
 });
 
 // Todo: Cache the year and month selections so that we don't call view update

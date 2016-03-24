@@ -12,10 +12,13 @@ a {
 	outline: none;
 }
 
-.container .btn-group .active,
-.container .btn-group-vertical .active {
+.container .year-group .active,
+.container .month-group .active,
+.container .qtr-group .active {
 	background-color : green
 }
+
+
 
 /*
  * CSS for year and quarter button groups
@@ -44,6 +47,10 @@ a {
 	border-bottom-style: solid;
 	border-bottom-color: black;
 */
+}
+
+#bubble-button-wrapper {
+	text-align: center;
 }
 
 /*
@@ -241,13 +248,14 @@ svg {
  */
 .bubble {
 	fill-opacity: .5;
-	stroke: #fff;
+	/*stroke: #fff;*/
+	stroke: steelblue;
 	stroke-width: .5px;
 	fill: brown;
 }
 
 .bubble :hover {
-	stroke: black;
+	stroke: blue;
 }
 
 .node {

@@ -63,5 +63,14 @@ block content
 				#barcanvas-div
 			#circlepack-div
 		#details-div
-			hr
+			.container
+				#bubble-button-wrapper
+					div(class="btn-group bubble-group" data-toggle="buttons")
+						label(class="btn btn-default active")
+							<input type="radio" id="revenue" value="revenue" autocomplete="off"> Revenue
+						label(class="btn btn-default")
+							<input type="radio" id="volume" value="volume"> Volume
+						label(class="btn btn-default")
+							<input type="radio" id="roi" value="cost"> Cost
+			<br />	
 			#bubble-div
