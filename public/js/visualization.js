@@ -39,7 +39,8 @@ var Visualization = function() {
 		this.chartSelections = {
 			'PIECHART' : {},
 			'BARCHART' : {},
-			'BUBBLECHART' : {}
+			'BUBBLECHART' : {},
+			'BUBBLES' : {}
 		};
 	},
 
@@ -56,11 +57,23 @@ var Visualization = function() {
 		this.setBusinessUnitsFromJSON();
 	},
 
+	this.showCirclePackChart =function(circlePackChartData) {
+		
+		if(circlePackChartData != undefined && circlePackChartData.length != 0){
+			$('#circlepack-div').html('');
+			parent.chartSelections.BUBBLECHART = {};
+			this.drawCirclePackChart(circlePackChartData, '#circlepack-div');
+		}
+		else {
+			Log('no data for circle pack chart');
+		}
+	},
+
 	this.showBubbleChart =function(bubbleChartData) {
 		if(bubbleChartData != undefined && bubbleChartData.length != 0){
 			$('#bubble-div').html('');
-			parent.chartSelections.BUBBLECHART = {};
-			this.drawCirclePackChart(bubbleChartData, '#bubble-div');
+			parent.chartSelections.BUBBLES = {};
+			this.drawBubbles(bubbleChartData, '#bubble-div', 1000, 400);
 		}
 		else {
 			Log('no data for bubble chart');
@@ -110,7 +123,8 @@ var Visualization = function() {
 
 			this.showPieChart(chartData['PIECHART']);
 			this.showBarChart(chartData['BARCHART']);
-			this.showBubbleChart(chartData['BUBBLECHART']);
+			this.showCirclePackChart(chartData['BUBBLECHART']);
+			this.showBubbleChart(chartData['BUBBLES']);
 		}
 		// Case 2: A selection is made in Pie chart
 		// and the bar chart and it's successors charts should
@@ -136,7 +150,8 @@ var Visualization = function() {
 			var chartData = this.getData(args);
 			Log('updating bar charts');
 			this.showBarChart(chartData['BARCHART']);
-			this.showBubbleChart(chartData['BUBBLECHART']);
+			this.showCirclePackChart(chartData['BUBBLECHART']);
+			this.showBubbleChart(chartData['BUBBLES']);
 		}
 		// Case 3: A selection is made in Bar chart
 		// and the bubble chart should propagate the selections made.
@@ -145,10 +160,10 @@ var Visualization = function() {
 			args['YEAR'] = this.years;
 			args['MONTH'] = this.months;
 			args['BUSINESSUNIT'] = this.businessUnits;
-
 			var chartData = this.getData(args);
 			Log('updating bubble charts');
-			this.showBubbleChart(chartData['BUBBLECHART']);
+			this.showCirclePackChart(chartData['BUBBLECHART']);
+			this.showBubbleChart(chartData['BUBBLES']);
 		}
 	},
 	/*
@@ -181,6 +196,7 @@ var Visualization = function() {
 		var pieChartDataArray = [], barChartDataArray = [], bubbleChartDataArray = [];
 		var customerJSON = {};
 		var countryJSON = {};
+		var productJSON = {};
 
 		//check whether arguments have valid data
 		if(args['CUSTOMER'].length == 0) {
@@ -225,9 +241,33 @@ var Visualization = function() {
 												
 												for(var prodMix in customers[customer][country]) {
 
-													if(countryJSON.hasOwnProperty(country)) {
+													var tempList = _.values(customers[customer][country][prodMix]);
+													revenueByProdMix = _.reduce(tempList, function( result , d){ return result+d; }, 0);
+													
+													
+													if(productJSON.hasOwnProperty(prodMix)){
+														for(var product in customers[customer][country][prodMix]) {
+															
+															if(productJSON[prodMix].hasOwnProperty(product)){
+																var revenueByProduct = customers[customer][country][prodMix][product];
+																revenueByProduct += productJSON[prodMix][product];
+																productJSON[prodMix][product] = revenueByProduct;
+															}
+															else{
+																productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+															}
+														}
+													}
+													else{
+														productJSON[prodMix] = {};
+														for(var product in customers[customer][country][prodMix]) {
+															
+																productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+																//Log("in else->revenue=> product="+product+"==="+customers[customer][country][prodMix][product]);
+														}
+													}
 
-														revenueByProdMix = customers[customer][country][prodMix];
+													if(countryJSON.hasOwnProperty(country)) {
 
 														if(countryJSON[country].hasOwnProperty(prodMix)){
 
@@ -242,7 +282,7 @@ var Visualization = function() {
 													else{
 
 														countryJSON[country] = {};
-														countryJSON[country][prodMix] = customers[customer][country][prodMix];
+														countryJSON[country][prodMix] = revenueByProdMix;
 													}
 												}
 											}
@@ -278,6 +318,7 @@ var Visualization = function() {
 							selectedMonth = selectedMonths[month];
 							//check whether month property is present for this object
 							if(inputData[selectedBusUnit][selectedYear].hasOwnProperty(selectedMonth)) {
+
 								revenueByBusinessUnit += inputData[selectedBusUnit][selectedYear][selectedMonth]['TOTAL'];
 								var customers = inputData[selectedBusUnit][selectedYear][selectedMonth];
 
@@ -304,9 +345,34 @@ var Visualization = function() {
 
 												for(var prodMix in customers[customer][country]){
 
-													if(countryJSON.hasOwnProperty(country)) {
-															revenueByProdMix = customers[customer][country][prodMix];
+													var tempList = _.values(customers[customer][country][prodMix]);
+													revenueByProdMix = _.reduce(tempList, function( memo , d){ return memo+d; }, 0);
 
+													if(productJSON.hasOwnProperty(prodMix)){
+														for(var product in customers[customer][country][prodMix]) {
+															
+															if(productJSON[prodMix].hasOwnProperty(product)){
+																var revenueByProduct = customers[customer][country][prodMix][product];
+																revenueByProduct += productJSON[prodMix][product];
+																productJSON[prodMix][product] = revenueByProduct;
+															}
+															else{
+																productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+															}
+														}
+													}
+													else{
+														productJSON[prodMix] = {};
+														for(var product in customers[customer][country][prodMix]) {
+															
+																productJSON[prodMix][product] = customers[customer][country][prodMix][product];
+														}
+													}
+
+													if(countryJSON.hasOwnProperty(country)) {
+															
+															//Log("BusinessUnit="+selectedBusUnit+" customer="+customer+" Country="+country+" prodMix="+prodMix+" sum="+revenueByProdMix);
+															
 															if(countryJSON[country].hasOwnProperty(prodMix)){
 
 																revenueByProdMix += countryJSON[country][prodMix];
@@ -319,7 +385,7 @@ var Visualization = function() {
 													}
 													else {
 														countryJSON[country] = {};
-														countryJSON[country][prodMix] = customers[customer][country][prodMix];
+														countryJSON[country][prodMix] = revenueByProdMix;
 													}
 												}
 											}
@@ -356,9 +422,10 @@ var Visualization = function() {
 				{"Name": <prodMix>, "size": <revenue>}
 			]
 		}
-			
 		*/
+
 		var bubbleChartArray = [];
+		var bubblesArray = [];
 		var bubbleChartData = { 
 			Name: "Bubble",
 			children: bubbleChartArray
@@ -377,14 +444,29 @@ var Visualization = function() {
 				bubbleChart['children'][prodIndex] ={};
 				bubbleChart['children'][prodIndex]['name'] = prodMix;
 				bubbleChart['children'][prodIndex]['size'] = countryJSON[country][prodMix];
+				//Log(" Country="+country+" prodMix="+prodMix+"sum="+countryJSON[country][prodMix]);
 				prodIndex++;
 			}
 			bubbleChartArray[countryIndex++] = bubbleChart;
 		}
 
+		var productDataArray = [];
+		var productIndex = 0;
+		//populate data for bubbles
+		for(var productMix in productJSON) {
+			for(var product in productJSON[productMix]) {
+				var productData = {};
+				productData['name'] = product;
+				productData['product'] = productMix;
+				productData['revenue'] = productJSON[productMix][product];
+				productDataArray[productIndex++] = productData;
+			}
+		}
+
 		chartData['PIECHART'] = pieChartDataArray;
 		chartData['BARCHART'] = barChartDataArray;
 		chartData['BUBBLECHART'] = bubbleChartData;
+		chartData['BUBBLES'] = productDataArray;
 
 		return chartData;
 	},
@@ -808,163 +890,10 @@ var Visualization = function() {
 		yMax = d3.max(stockData, function(d) {return d[1]});
 		redraw(1);
 	},
-/*
-		var JSONdata = convertDataForBarChart(dataset);
-		var yAxisData = JSONdata['dataArray'];
-		var labelData = JSONdata['labelArray'];
-
-		Log("drawing bar chart");
-		
-		c3.generate({
-			bindto: division,
-			data: {
-			  columns: [
-				yAxisData
-			  ],
-			  axes: {
-				customers : 'y'
-			  },
-			  types: {
-				customers : 'bar' // ADD
-			  }
-			},
-			tooltip: {
-			  contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
-
-			  	//format currency to have commas
-				var revenue = d[0].value.toFixed(0).replace(/./g, function(c, i, a) {
-					return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-				});
-
-				var tooltipHTML = "<table class='pie-tooltip'>"
-							+ "<tbody>"
-								+ "<tr>"
-									+ "<th colspan=2>" + d[0].x + "</th>"
-								+ "</tr>"
-								+ "<tr>"
-									+ "<td class='value'> $" + revenue + "</td>"
-								+ "</tr>"
-							+ "</tbody>"
-						+ "</table>";
-
-			    return tooltipHTML;
-				//return defaultValueFormat;
-			  }
-			},
-			axis: {
-			  y: {
-			  	type: 'bar',
-			  	tick: {
-			  		count: 6,
-			  		format: function(x){
-
-		  				var revenue = x.toFixed(0).replace(/./g, function(c, i, a) {
-							return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-						});
-
-						return "$"+revenue;
-
-			  		}
-			  	},
-				label: {
-				  text: 'Revenue',
-				  position: 'outer-middle'
-				}
-			  },
-			  y2: {
-				show: false,
-				label: {
-				  text: 'Y2 Label',
-				  position: 'outer-middle'
-				}
-			  }
-			}
-		});
-
-		 //c3-event-rect c3-event-rect-12
-
-		d3.selectAll('.c3-event-rect')
-			.on('click', function(value, index) {
-				d3.select('.c3-event-rect-' + index).style('fill', 'yellow').style('opacity', '1');
-				Log("index = " + index + " value = " + columnData[index]);
-			});
-	},
-
-	this.drawBarChart = function(dataset, division){		
-		var margin = {top: 20, right: 20, bottom: 30, left: 40},
-		width = 800 - margin.left - margin.right,
-		height = 300 - margin.top - margin.bottom;
-		
-		var x = d3.scale.ordinal()
-		.rangeRoundBands([0, width], .1);
-
-		var y = d3.scale.linear()
-		.range([height, 0]);
-
-		var yAxis = d3.svg.axis()
-		.scale(y)
-		.orient("left")
-		.ticks(6);
-
-		var tipBar = d3.tip()
-				.attr('class', 'd3-tip');
-
-		var svg = d3.select(division).append("svg")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-				.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		svg.call(tipBar);
-
-		x.domain(dataset.map(function(d) { return d.label; }));
-		y.domain([0, d3.max(dataset, function(d) { return d.data; })]);
-
-		svg.append("g")
-				.attr("class", "x axis")
-				.attr("transform", "translate(0," + height + ")");
-				//.call(xAxis);
-
-		svg.append("g")
-				.attr("class", "y axis")
-				.call(yAxis)
-				.append("text")
-				.attr("transform", "rotate(-90)")
-				.attr("y", 6)
-				.attr("dy", ".71em")
-				.style("text-anchor", "end")
-				.text("Revenue");	
-
-		svg.selectAll(".bar")
-				.data(dataset)
-				.enter().append("rect")
-				.attr("class", "bar")
-				.attr("x", function(d) { return x(d.label); })
-				.attr("width", x.rangeBand())
-				.on('mouseover', function(d){
-
-
-				})
-				.on('mouseout',tipBar.hide)
-				.attr("y", function(d) { return y(d.data); })
-				.attr("height", function(d) { return height - y(d.data); });
-
-	function mouseOver(d) {
-		
-		var tableMessage = "<table border='2' align='center'><tr><td >Customer</td><td bgcolor='green' align='center'>"+ d.label +"</td></tr><tr><td>Revenue</td><td bgcolor='green' align='center'> $"+ formatCurrency(d.data, 1) +"</td></tr></table>";
-		//display percent value in tool tip for the seleceted bar
-		console.log(d.data);
-		tipBar.html(function(b) {
-			return tableMessage;
-		});
-		tipBar.show();
-	}
-
-	}*/
 
 	this.drawCirclePackChart = function(root, division) {
 
-		var margin = 20,
+		var margin = 20, 
 		diameter = 340;
 
 		var color = d3.scale.linear()
@@ -977,11 +906,20 @@ var Visualization = function() {
 		.size([diameter - margin, diameter - margin])
 		.value(function(d) { return d.size; })
 
+		var tip = d3.tip()
+		.attr('class', 'd3-tip')
+		.offset([0, 0]);
+
+		var ZoomTip = d3.tip()
+		.attr('class', 'd3-tip')
+		.offset([0, 0]);
+
 		var svg = d3.select(division).append("svg")
 		.attr("width", diameter)
 		.attr("height", diameter)
 		.append("g")
-		.attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+		.attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")")
+		.call(tip);
 
 		var focus = root,
 		nodes = pack.nodes(root),
@@ -992,7 +930,9 @@ var Visualization = function() {
 		.enter().append("circle")
 		.attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
 		.style("fill", function(d) { return d.children ? color(d.depth) : null; })
-		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
+		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
+		.on("mouseover", function (d) { mouseOver(d); })
+		.on("mouseout", function (d) { tip.hide(); });
 
 		var text = svg.selectAll("text")
 		.data(nodes)
@@ -1005,12 +945,12 @@ var Visualization = function() {
 		var node = svg.selectAll("circle,text");
 
 		d3.select(division)
-		//.style("background", color(-1))
 		.on("click", function() { zoom(root); });
 
 		zoomTo([root.x, root.y, root.r * 2 + margin]);
 
 		function zoom(d) {
+		tip.hide();
 		var focus0 = focus; focus = d;
 
 		var transition = d3.transition()
@@ -1038,58 +978,60 @@ var Visualization = function() {
 		var k = diameter / v[2]; view = v;
 		node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
 		circle.attr("r", function(d) { return d.r * k; });
+		circle.on("mouseover", function (d) { mouseOver(d); });
+		circle.on("mouseout", function (d) { tip.hide(); });
+		
+		}
+
+		function mouseOver(d) {
+
+			   var tooltipHTML = "<table class='pie-tooltip'>"
+				+ "<tbody>"
+					+ "<tr>"
+						+ "<th colspan=2>" + d.name + "</th>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>Revenue </td>"
+						+ "<td class='value'> $" + formatCurrency(d.value, 1, 'M') + "</td>"
+					+ "</tr>"
+				+ "</tbody>"
+			+ "</table>";
+
+			//display percent value in tool tip for the seleceted arc
+			tip.html(tooltipHTML);
+			tip.show();
+
 		}
 
 		d3.select(self.frameElement).style("height", diameter + "px");
 	},
 
-	this.drawBubbles = function(dataset, division) { 
-		
+	this.drawBubbles = function(data, division, width, height) { 
+
 		var group = size = color = '';
+		var colors = {default: '#4CC1E9'};
 
-		function create(data) {
-		var colors = {
-		  exchange: {
-		    NYSE: 'red',
-		    NASDAQ: 'orange',
-		    TSX: 'blue',
-		    'TSX-V': 'green'
-		  },
-		  volumeCategory: {
-		    Top: 'mediumorchid',
-		    Middle: 'cornflowerblue',
-		    Bottom: 'gold'
-		  },
-		  lastPriceCategory: {
-		    Top: 'aqua',
-		    Middle: 'chartreuse',
-		    Bottom: 'crimson'
-		  },
-		  standardDeviationCategory: {
-		    Top: 'slateblue',
-		    Middle: 'darkolivegreen',
-		    Bottom: 'orangered'
-		  },
-		  default: '#4CC1E9' 
-		};
+		var radius = 20;
 
-		var radius = 75;
-		var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-		var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+		var tip = d3.tip()
+			.attr('class', 'd3-tip')
+			.offset([0, 0]);
+		//var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+		//var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 		var fill = d3.scale.ordinal().range(['#FF00CC','#FF00CC','#00FF00','#00FF00','#FFFF00','#FF0000','#FF0000','#FF0000','#FF0000','#7F0000']);
-		var svg = d3.select("#chart").append("svg")
+		var svg = d3.select(division).append("svg")
 		    .attr("width", width)
-		    .attr("height", height);
+		    .attr("height", height).call(tip);
 
-		data = getDataMapping(data, size);
+		data = getDataMapping(data, 'revenue');
 
 		var padding = 5;
 		var maxRadius = d3.max(_.pluck(data, 'radius'));
 
 		var maximums = {
-		  volume: d3.max(_.pluck(data, 'volume')),
-		  lasPrice: d3.max(_.pluck(data, 'lastPrice')),
-		  standardDeviation: d3.max(_.pluck(data, 'standardDeviation'))
+		  revenue: d3.max(_.pluck(data, 'revenue'))
+		  //lasPrice: d3.max(_.pluck(data, 'lastPrice')),
+		  //standardDeviation: d3.max(_.pluck(data, 'standardDeviation'))
 		};
 
 		var getCenters = function (vname, size) {
@@ -1098,6 +1040,7 @@ var Visualization = function() {
 		    return {name: d, value: 1};
 		  });
 		  
+
 		  map = d3.layout.treemap().size(size).ratio(1/1);
 		  map.nodes({children: centers});
 
@@ -1108,24 +1051,43 @@ var Visualization = function() {
 		  .data(data);
 
 		nodes.enter().append("circle")
-		  .attr("class", "node")
+		  .attr("class", "bubbles-circle")
 		  .attr("cx", function (d) { return d.x; })
 		  .attr("cy", function (d) { return d.x; })
 		  .attr("r", function (d) { return d.radius; })
 		  .style("fill", function (d, i) { return colors['default']; })
-		  .on("mouseover", function (d) { showPopover.call(this, d); })
-		  .on("mouseout", function (d) { removePopovers(); });
+		 // .on("mouseover", function (d) { showPopover.call(this, d); })
+		  //.on("mouseout", function (d) { removePopovers(); });
+		  .on("mouseover", function (d) { mouseOver(d); })
+		  .on("mouseout", function (d) { tip.hide(); });
+
+		function mouseOver(d) {
+
+			   var tooltipHTML = "<table class='pie-tooltip'>"
+				+ "<tbody>"
+					+ "<tr>"
+						+ "<th colspan=2>" + d.name + "</th>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>Revenue </td>"
+						+ "<td class='value'> $" + formatCurrency(d.revenue, 1, 'M') + "</td>"
+					+ "</tr>"
+				+ "</tbody>"
+			+ "</table>";
+
+			//display percent value in tool tip for the seleceted arc
+			tip.html(tooltipHTML);
+			tip.show();
+
+		}
 
 		function getDataMapping(data, vname) {
 		  var max = d3.max(_.pluck(data, vname));
 		  
 		  for (var j = 0; j < data.length; j++) {
-		    data[j].radius = (vname != '') ? radius * (data[j][vname] / max) : 15;
+		    data[j].radius = (vname != '') ? radius * (data[j][vname] / max) : 10;
 		    data[j].x = data[j].x ? data[j].x : Math.random() * width;
 		    data[j].y = data[j].y ? data[j].y : Math.random() * height;
-		    data[j].volumeCategory = getCategory('volume', data[j]);
-		    data[j].lastPriceCategory = getCategory('lastPrice', data[j]);
-		    data[j].standardDeviationCategory = getCategory('standardDeviation', data[j]);
 		  }
 
 		  return data;
@@ -1139,41 +1101,7 @@ var Visualization = function() {
 		  else if(val > 0.1) return 'Middle';
 		  else return 'Bottom';
 		}
-
-		$('#board').change(function() {
-		  $('#chart').empty();
-
-		  start(this.value);
-		});
-
-		$('#group').change(function() {
-		  group = this.value;
-		  draw(group);
-		});
-
-		$('#size').change(function() {
-		  var val = this.value;
-		  var max = d3.max(_.pluck(data, val));
-
-		  d3.selectAll("circle")
-		    .data(getDataMapping(data, this.value))
-		    .transition()
-		    .attr('r', function(d, i) { return val ? (radius * (data[i][val] / max)) : 15 })
-		    .attr('cx', function(d) { return d.x })
-		    .attr('cy', function(d) { return d.y })
-		    .duration(1000);
-
-		  size = this.value;
-
-		  force.start();
-		});
-
-		$('#color').change(function() {
-		  color = this.value;
-		  changeColor(this.value);
-		});
-
-
+		 
 		function changeColor(val) {
 		  console.log(val);
 		  d3.selectAll("circle")
@@ -1192,8 +1120,8 @@ var Visualization = function() {
 
 		var force = d3.layout.force();
 
-		changeColor(color);
-		draw(group);
+		//changeColor(color);
+		draw('product');
 
 		function draw (varname) {
 		  var centers = getCenters(varname, [width, height]);
@@ -1225,7 +1153,7 @@ var Visualization = function() {
 
 		  svg.selectAll(".label")
 		  .data(centers).enter().append("text")
-		  .attr("class", "label")
+		  .attr("class", "bubbles-label")
 		  .text(function (d) { return d.name })
 		  .attr("transform", function (d) {
 		    return "translate(" + (d.x + (d.dx / 2)) + ", " + (d.y + 20) + ")";
@@ -1245,15 +1173,18 @@ var Visualization = function() {
 		    trigger: 'manual',
 		    html : true,
 		    content: function() { 
-		      return "Symbol: " + d.symbol + "<br />" +
-		      "Name: " + d.symbolName + "<br />" +
-		      "Industry: " + d.industry + "<br />" +
-		      "Exchange: " + d.exchange + "<br />" +
-		      "Country: " + d.country + "<br />" +
-		      "SIC Sector: " + d.sicSector + "<br />" +
-		      "Last: " + d.lastPrice + " (" + d.pricePercentChange + "%)<br />" +
-		      "Volume: " + d.volume + "<br />" +
-		      "Standard Deviation: " + d.standardDeviation; 
+		      return "<table class='pie-tooltip'>"
+				+ "<tbody>"
+					+ "<tr>"
+						+ "<th colspan=2>" + d.name + "</th>"
+					+ "</tr>"
+					+ "<tr>"
+						+ "<td>Revenue </td>"
+						+ "<td class='value'> $" + formatCurrency(d.revenue, 1, 'M') + "</td>"
+					+ "</tr>"
+				+ "</tbody>"
+			+ "</table>";
+		      //"Exchange: " + d.exchange + "<br />"
 		    }
 		  });
 		  $(this).popover('show')
@@ -1285,9 +1216,7 @@ var Visualization = function() {
 		    });
 		  };
 		}
-		}
-
-	}
+	},
 
 	this.destroy = function() {
 

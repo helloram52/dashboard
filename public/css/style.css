@@ -113,7 +113,7 @@ a {
 	margin-top: 30px;
 }
 
-#bubble-div {
+#circlepack-div {
 /*
 	outline: 1px solid black;
 	background: transparent;
@@ -128,7 +128,10 @@ a {
 #details-div {
 	width: 100%;
 	float:left;
-	margin-left: 120px;
+}
+
+#bubble-div {
+
 }
 
 svg {
@@ -233,7 +236,7 @@ svg {
 
 
 /*
- * CSS for Bubble Chart
+ * CSS for circle Pack Chart
  */
 .bubble {
 	fill-opacity: .5;
@@ -269,4 +272,35 @@ svg {
 .node--root,
 .node--leaf {
   pointer-events: none;
+}
+
+/*
+* CSS for bubble chart
+*/
+
+.bubbles-circle {
+	cursor: pointer;
+	stroke: #555;
+	stroke-width: 2px;
+	opacity: .8;
+}
+
+.bubbles-circle:hover {
+	stroke:#000;
+	opacity:1;
+}
+
+.bubbles-label {
+	font-size: 20px;
+}
+
+.color-legend {
+	min-height: 100%; 
+	min-height: 100vh; 
+
+	display: flex;
+	align-items: center;
+
+	height:34px; font-weight:bold; text-align:center; color:white;
+	text-shadow: 2px 2px #333;
 }

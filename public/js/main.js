@@ -43,6 +43,7 @@ var mostRecentYear;
 var ctrlKeyPressed = false;
 
 $(document).on('keydown', function() {
+	Log("key pressed, code="+event.which);
 	if(event.which == '17') {
 		ctrlKeyPressed = true;
 	}
