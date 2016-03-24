@@ -932,7 +932,8 @@ var Visualization = function() {
 		.style("fill", function(d) { return d.children ? color(d.depth) : null; })
 		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
 		.on("mouseover", function (d) { mouseOver(d); })
-		.on("mouseout", function (d) { tip.hide(); });
+		.on("mouseout", function (d) { tip.hide(); })
+		.attr('selected', function(d, i) { return '0';});
 
 		var text = svg.selectAll("text")
 		.data(nodes)
@@ -980,7 +981,8 @@ var Visualization = function() {
 		circle.attr("r", function(d) { return d.r * k; });
 		circle.on("mouseover", function (d) { mouseOver(d); });
 		circle.on("mouseout", function (d) { tip.hide(); });
-		
+		circle.
+
 		}
 
 		function mouseOver(d) {
