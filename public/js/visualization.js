@@ -1162,13 +1162,18 @@ var Visualization = function() {
 		.attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
 		.style("fill", function(d) { return d.children ? color(d.depth) : null; })
 		.on("click", function(d) { 
-			if (focus !== d) { 
-				mouseClick(this, d); 
-				zoom(d); 
+			if(!ctrlKeyPressed) {
+				if (focus !== d) { 
+					zoom(d); 
+					d3.event.stopPropagation();
+				}
+			}
+			else {
+				mouseClick(this, d);
 				d3.event.stopPropagation();
 			}
-			})
 
+			})
 		.on("mouseover", function (d) { mouseOver(d); })
 		.on("mouseout", function (d) { tip.hide(); })
 		.attr('selected', function(d, i) { return '0';});
@@ -1285,7 +1290,13 @@ var Visualization = function() {
 		var group = size = color = '';
 		var colors = {default: '#4CC1E9'};
 
-		var radius = 20;
+		var sizeByRadiusMap = { 
+			'revenue': 20,
+			'volume' : 25,
+			'cost'	 : 15
+		};
+
+		var radius = sizeByRadiusMap[sizeBy];
 
 		var tip = d3.tip()
 			.attr('class', 'd3-tip')
@@ -1352,7 +1363,7 @@ var Visualization = function() {
 					+ "</tr>"
 					+ "<tr>"
 						+ "<td>Cost </td>"
-						+ "<td class='value'> " + "$"+formatCurrency(d.cost, 1, 'M') + "</td>"
+						+ "<td class='value'> $" + formatCurrency(d.cost, 1, 'M') + "</td>"
 					+ "</tr>"
 				+ "</tbody>"
 			+ "</table>";
