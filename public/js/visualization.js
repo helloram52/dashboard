@@ -931,9 +931,18 @@ var Visualization = function() {
 		.attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
 		.style("fill", function(d) { return d.children ? color(d.depth) : null; })
 		.on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); })
+<<<<<<< 37efd0ebf7b385ddf91bee40e245921f25ec9019
 		.on("mouseover", function (d) { mouseOver(d); })
 		.on("mouseout", function (d) { tip.hide(); })
 		.attr('selected', function(d, i) { return '0';});
+=======
+		.on("mouseover", function (d) {
+			mouseOver(d);
+		})
+		.on("mouseout", function (d) {
+			tip.hide();
+		});
+>>>>>>> slight changes to page layout
 
 		var text = svg.selectAll("text")
 		.data(nodes)
@@ -951,43 +960,43 @@ var Visualization = function() {
 		zoomTo([root.x, root.y, root.r * 2 + margin]);
 
 		function zoom(d) {
-		tip.hide();
-		var focus0 = focus; focus = d;
+			tip.hide();
+			var focus0 = focus; focus = d;
 
-		var transition = d3.transition()
-		.duration(d3.event.altKey ? 7500 : 750)
-		.tween("zoom", function(d) {
-		  var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
-		  return function(t) { zoomTo(i(t)); };
-		});
+			var transition = d3.transition()
+				.duration(d3.event.altKey ? 7500 : 750)
+				.tween("zoom", function(d) {
+					var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+					return function(t) { zoomTo(i(t)); };
+				});
 
-		transition.selectAll("text")
-		.filter(function(d) { 
-			if(!d) 
-				return false;
-			return d.parent === focus || this.style.display === "inline"; })
-		.style("fill-opacity", function(d) { 
-			if(!d) 
-				return false;
-			return d.parent === focus ? 1 : 0; })
-		.each("start", function(d) { 
-			if (d && d.parent === focus) this.style.display = "inline"; })
-		.each("end", function(d) { if (d && d.parent !== focus) this.style.display = "none"; });
+			transition.selectAll("text")
+				.filter(function(d) { 
+					if(!d) 
+						return false;
+					return d.parent === focus || this.style.display === "inline";
+				})
+				.style("fill-opacity", function(d) { 
+					if(!d) 
+						return false;
+					return d.parent === focus ? 1 : 0;
+				})
+				.each("start", function(d) { 
+					if (d && d.parent === focus) this.style.display = "inline";
+				})
+				.each("end", function(d) {
+					if (d && d.parent !== focus) this.style.display = "none";
+				});
 		}
 
 		function zoomTo(v) {
-		var k = diameter / v[2]; view = v;
-		node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
-		circle.attr("r", function(d) { return d.r * k; });
-		circle.on("mouseover", function (d) { mouseOver(d); });
-		circle.on("mouseout", function (d) { tip.hide(); });
-		circle.
-
+			var k = diameter / v[2]; view = v;
+			node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+			circle.attr("r", function(d) { return d.r * k; });
 		}
 
 		function mouseOver(d) {
-
-			   var tooltipHTML = "<table class='pie-tooltip'>"
+			var tooltipHTML = "<table class='pie-tooltip'>"
 				+ "<tbody>"
 					+ "<tr>"
 						+ "<th colspan=2>" + d.name + "</th>"
@@ -1002,7 +1011,6 @@ var Visualization = function() {
 			//display percent value in tool tip for the seleceted arc
 			tip.html(tooltipHTML);
 			tip.show();
-
 		}
 
 		d3.select(self.frameElement).style("height", diameter + "px");
@@ -1022,8 +1030,8 @@ var Visualization = function() {
 		//var height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 		var fill = d3.scale.ordinal().range(['#FF00CC','#FF00CC','#00FF00','#00FF00','#FFFF00','#FF0000','#FF0000','#FF0000','#FF0000','#7F0000']);
 		var svg = d3.select(division).append("svg")
-		    .attr("width", width)
-		    .attr("height", height).call(tip);
+			.attr("width", width)
+			.attr("height", height).call(tip);
 
 		data = getDataMapping(data, 'revenue');
 
@@ -1039,7 +1047,7 @@ var Visualization = function() {
 		var getCenters = function (vname, size) {
 		  var centers, map;
 		  centers = _.uniq(_.pluck(data, vname)).map(function (d) {
-		    return {name: d, value: 1};
+			return {name: d, value: 1};
 		  });
 		  
 
@@ -1087,9 +1095,9 @@ var Visualization = function() {
 		  var max = d3.max(_.pluck(data, vname));
 		  
 		  for (var j = 0; j < data.length; j++) {
-		    data[j].radius = (vname != '') ? radius * (data[j][vname] / max) : 10;
-		    data[j].x = data[j].x ? data[j].x : Math.random() * width;
-		    data[j].y = data[j].y ? data[j].y : Math.random() * height;
+			data[j].radius = (vname != '') ? radius * (data[j][vname] / max) : 10;
+			data[j].x = data[j].x ? data[j].x : Math.random() * width;
+			data[j].y = data[j].y ? data[j].y : Math.random() * height;
 		  }
 
 		  return data;
@@ -1107,15 +1115,15 @@ var Visualization = function() {
 		function changeColor(val) {
 		  console.log(val);
 		  d3.selectAll("circle")
-		    .transition()
-		    .style('fill', function(d) { return val ? colors[val][d[val]] : colors['default'] })
-		    .duration(1000);
+			.transition()
+			.style('fill', function(d) { return val ? colors[val][d[val]] : colors['default'] })
+			.duration(1000);
 
 		  $('.colors').empty();
 		  if(val) {
-		    for(var label in colors[val]) {
-		      $('.colors').append('<div class="col-xs-1 color-legend" style="background:'+colors[val][label]+';">'+label+'</div>')
-		    }
+			for(var label in colors[val]) {
+			  $('.colors').append('<div class="col-xs-1 color-legend" style="background:'+colors[val][label]+';">'+label+'</div>')
+			}
 		  }
 		}
 
@@ -1135,18 +1143,18 @@ var Visualization = function() {
 		function tick (centers, varname) {
 		  var foci = {};
 		  for (var i = 0; i < centers.length; i++) {
-		    foci[centers[i].name] = centers[i];
+			foci[centers[i].name] = centers[i];
 		  }
 		  return function (e) {
-		    for (var i = 0; i < data.length; i++) {
-		      var o = data[i];
-		      var f = foci[o[varname]];
-		      o.y += ((f.y + (f.dy / 2)) - o.y) * e.alpha;
-		      o.x += ((f.x + (f.dx / 2)) - o.x) * e.alpha;
-		    }
-		    nodes.each(collide(.11))
-		      .attr("cx", function (d) { return d.x; })
-		      .attr("cy", function (d) { return d.y; });
+			for (var i = 0; i < data.length; i++) {
+			  var o = data[i];
+			  var f = foci[o[varname]];
+			  o.y += ((f.y + (f.dy / 2)) - o.y) * e.alpha;
+			  o.x += ((f.x + (f.dx / 2)) - o.x) * e.alpha;
+			}
+			nodes.each(collide(.11))
+			  .attr("cx", function (d) { return d.x; })
+			  .attr("cy", function (d) { return d.y; });
 		  }
 		}
 
@@ -1158,24 +1166,24 @@ var Visualization = function() {
 		  .attr("class", "bubbles-label")
 		  .text(function (d) { return d.name })
 		  .attr("transform", function (d) {
-		    return "translate(" + (d.x + (d.dx / 2)) + ", " + (d.y + 20) + ")";
+			return "translate(" + (d.x + (d.dx / 2)) + ", " + (d.y + 20) + ")";
 		  });
 		}
 
 		function removePopovers () {
 		  $('.popover').each(function() {
-		    $(this).remove();
+			$(this).remove();
 		  }); 
 		}
 
 		function showPopover (d) {
 		  $(this).popover({
-		    placement: 'auto top',
-		    container: 'body',
-		    trigger: 'manual',
-		    html : true,
-		    content: function() { 
-		      return "<table class='pie-tooltip'>"
+			placement: 'auto top',
+			container: 'body',
+			trigger: 'manual',
+			html : true,
+			content: function() { 
+			  return "<table class='pie-tooltip'>"
 				+ "<tbody>"
 					+ "<tr>"
 						+ "<th colspan=2>" + d.name + "</th>"
@@ -1186,8 +1194,8 @@ var Visualization = function() {
 					+ "</tr>"
 				+ "</tbody>"
 			+ "</table>";
-		      //"Exchange: " + d.exchange + "<br />"
-		    }
+			  //"Exchange: " + d.exchange + "<br />"
+			}
 		  });
 		  $(this).popover('show')
 		}
@@ -1195,27 +1203,27 @@ var Visualization = function() {
 		function collide(alpha) {
 		  var quadtree = d3.geom.quadtree(data);
 		  return function (d) {
-		    var r = d.radius + maxRadius + padding,
-		        nx1 = d.x - r,
-		        nx2 = d.x + r,
-		        ny1 = d.y - r,
-		        ny2 = d.y + r;
-		    quadtree.visit(function(quad, x1, y1, x2, y2) {
-		      if (quad.point && (quad.point !== d)) {
-		        var x = d.x - quad.point.x,
-		            y = d.y - quad.point.y,
-		            l = Math.sqrt(x * x + y * y),
-		            r = d.radius + quad.point.radius + padding;
-		        if (l < r) {
-		          l = (l - r) / l * alpha;
-		          d.x -= x *= l;
-		          d.y -= y *= l;
-		          quad.point.x += x;
-		          quad.point.y += y;
-		        }
-		      }
-		      return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-		    });
+			var r = d.radius + maxRadius + padding,
+				nx1 = d.x - r,
+				nx2 = d.x + r,
+				ny1 = d.y - r,
+				ny2 = d.y + r;
+			quadtree.visit(function(quad, x1, y1, x2, y2) {
+			  if (quad.point && (quad.point !== d)) {
+				var x = d.x - quad.point.x,
+					y = d.y - quad.point.y,
+					l = Math.sqrt(x * x + y * y),
+					r = d.radius + quad.point.radius + padding;
+				if (l < r) {
+				  l = (l - r) / l * alpha;
+				  d.x -= x *= l;
+				  d.y -= y *= l;
+				  quad.point.x += x;
+				  quad.point.y += y;
+				}
+			  }
+			  return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+			});
 		  };
 		}
 	},
